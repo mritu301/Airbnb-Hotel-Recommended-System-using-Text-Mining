@@ -1,0 +1,272 @@
+---
+title: "Content Based Recommendation System"
+author: "Mritunjay And Sunil"
+date: "13/10/2019"
+output: html_document
+---
+
+# Recommended System Techniques on Airbnb (Amsterdam Hotel Recommendation)
+# 1. Content Based Recommendation System
+
+### Load all the relevant libraries and Get the working directory and Load the Amsterdam Hotel Airbn data set
+```{r}
+pacman::p_load(tidyverse, purrr, stringr, data.table, modelr, readxl,caret, corrplot, broom, ggpubr, tm, proxy, MASS,relaimpo, car,interplot, caTools, mice, gbm, reshape2, compiler, recommenderlab, Matrix, knitr,tidyr, dplyr, animation, wordnet, RColorBrewer, wordcloud, SnowballC, topicmodels, ggplot2, cluster, fpc)
+getwd()
+airbnb = read.csv("airbnb.csv", header=TRUE, sep=",") # transaction format!
+names(airbnb) = c(colnames(airbnb))
+head(airbnb,1)
+```
+
+### Structure of Datasets
+```{r}
+str(airbnb)
+```
+
+### Create a dataset for CF from main airbnb dataset (User_ID, Hotel_ID, Ratings)
+```{r}
+colnames(airbnb)
+```
+
+### Create airbnb_hotels dataframe with features columns to create corpus for text mining along with Hotel ID
+```{r}
+airbnb_Hotels <- airbnb[, c('Hotel_Id', 'summary', 'space', 'description', 'property_type', 'room_type', 'accommodates', 'bathrooms', 'bedrooms', 'beds', 'bed_type', 'amenities')]
+airbnb_Hotels_Unique = airbnb_Hotels[!duplicated(airbnb_Hotels$Hotel_Id), ]
+head(airbnb_Hotels_Unique,4)
+```
+
+### Now Combined all the features columns for mining
+```{r}
+airbnb_Hotels_Unique$features_text = paste(airbnb_Hotels_Unique$summary, airbnb_Hotels_Unique$space, airbnb_Hotels_Unique$description, airbnb_Hotels_Unique$property_type, airbnb_Hotels_Unique$room_type, airbnb_Hotels_Unique$accommodates, airbnb_Hotels_Unique$bathrooms, airbnb_Hotels_Unique$bedrooms, airbnb_Hotels_Unique$beds, airbnb_Hotels_Unique$bed_type, airbnb_Hotels_Unique$amenities)
+airbnb_Hotels_mining = airbnb_Hotels_Unique[,c("Hotel_Id","features_text")]
+write.csv(airbnb_Hotels_mining,"airbnb_Hotels_mining.csv")
+head(airbnb_Hotels_mining,2)
+```
+
+### Now Create Corpus on features_text
+```{r}
+HotelStopWord = c(stopwords('english'), "also", "hous", "includ", "well", "around", "fuli", "great", "lot", "apart", "famous", "minut", "amsterdam", "love", "within", "space", "away", "nice", "friend", "need", "best", "use", "find", "miss", "public", "close", "open", "locat", "can", "will", "just", "like")
+corpus <- VCorpus(VectorSource(airbnb_Hotels_mining$features_text))
+
+corpusNormalization <- function(corpus) {
+  corpus <- tm_map(corpus, content_transformer(tolower))
+  corpus <- tm_map(corpus, removeNumbers)
+  corpus <- tm_map(corpus, removeWords, HotelStopWord)
+  corpus <- tm_map(corpus, removePunctuation)
+  corpus <- tm_map(corpus, stemDocument)
+  corpus <- tm_map(corpus, removeWords, HotelStopWord)
+  corpus <- tm_map(corpus, stripWhitespace)
+ 
+  return(corpus)
+}
+
+corpusNorms = corpusNormalization(corpus)
+
+dtm <- DocumentTermMatrix(corpusNorms)
+dtm_ti <- weightTfIdf(dtm)
+dtm_ti
+
+mat_ti <- as.matrix(dtm_ti)
+
+### Count the frequency of each concept
+CorpusFreq <- colSums(as.matrix(dtm)) #Sum each column
+head(CorpusFreq)
+```
+
+
+### Histograms for most occured words
+```{r}
+wf <- data.frame(term = names(CorpusFreq), occurrences = CorpusFreq)
+
+ggplot(subset(wf, CorpusFreq > 250), aes(term, occurrences, color = term)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+### Add color on wordcloud for Accident Type Column
+```{r}
+dark2 <- brewer.pal(6, "Dark2")
+wordcloud(names(CorpusFreq), CorpusFreq, max.words=100, rot.per=0.6, colors=dark2)
+```
+
+### Find the Frequency of ReportTypeCorpusFreq
+```{r}
+length(CorpusFreq)   ### [1] 2725
+
+CorpusOrderFreq <- order(CorpusFreq, decreasing = TRUE)
+
+CorpusFreq[head(CorpusOrderFreq,10)]
+# kill   fall  injur struck    die   burn 
+# 2139   2114   1724   1151   1093    982 
+
+CorpusFreq[tail(CorpusOrderFreq)]
+```
+
+```{r}
+rownames(airbnb_Hotels_mining) <- 1:nrow(airbnb_Hotels_mining)
+dist_mat_cos <- as.matrix(dist(mat_ti, method = "cosine"))
+dist_mat_cos_df = data.frame(sort(dist_mat_cos[, 1], decreasing = T)[1:5])
+c = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1] 
+dist_mat_cos_df
+
+
+Top1_Similar_Hotel = integer(nrow(airbnb_Hotels_mining))
+Top2_Similar_Hotel = integer(nrow(airbnb_Hotels_mining))
+Top3_Similar_Hotel = integer(nrow(airbnb_Hotels_mining))
+Top4_Similar_Hotel = integer(nrow(airbnb_Hotels_mining))
+Top5_Similar_Hotel = integer(nrow(airbnb_Hotels_mining))
+
+for (i in 1:nrow(airbnb_Hotels_mining)) {
+  target = airbnb_Hotels_mining[rownames(airbnb_Hotels_mining)[i],1]
+  dist_mat_cos_df = data.frame(sort(dist_mat_cos[, i], decreasing = T)[1])
+  Top1_Similar_Hotel[i] = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1]
+  
+  dist_mat_cos_df = data.frame(sort(dist_mat_cos[, i], decreasing = T)[2])
+  Top2_Similar_Hotel[i] = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1]
+  
+  dist_mat_cos_df = data.frame(sort(dist_mat_cos[, i], decreasing = T)[3])
+  Top3_Similar_Hotel[i] = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1]
+  
+  dist_mat_cos_df = data.frame(sort(dist_mat_cos[, i], decreasing = T)[4])
+  Top4_Similar_Hotel[i] = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1]
+  
+  dist_mat_cos_df = data.frame(sort(dist_mat_cos[, i], decreasing = T)[5])
+  Top5_Similar_Hotel[i] = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1]
+}
+
+df_cb <- data.frame(Top1_Similar_Hotel, 
+                    Top2_Similar_Hotel, 
+                    Top3_Similar_Hotel, 
+                    Top4_Similar_Hotel, 
+                    Top5_Similar_Hotel, stringsAsFactors = TRUE)
+rownames(df_cb) = airbnb_Hotels_mining[,1]
+write.csv(df_cb, file = "Content Based Recommended Hotel For each Hotel using cosine.csv")
+
+
+
+dist_mat_cos <- as.matrix(dist(mat_ti, method = "euclidean"))
+dist_mat_cos_df = data.frame(sort(dist_mat_cos[, 1], decreasing = T)[1:10])
+e = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1] 
+dist_mat_cos_df
+
+Top1_Similar_Hotel = integer(nrow(airbnb_Hotels_mining))
+Top2_Similar_Hotel = integer(nrow(airbnb_Hotels_mining))
+Top3_Similar_Hotel = integer(nrow(airbnb_Hotels_mining))
+Top4_Similar_Hotel = integer(nrow(airbnb_Hotels_mining))
+Top5_Similar_Hotel = integer(nrow(airbnb_Hotels_mining))
+
+for (i in 1:nrow(airbnb_Hotels_mining)) {
+  target = airbnb_Hotels_mining[rownames(airbnb_Hotels_mining)[i],1]
+  dist_mat_cos_df = data.frame(sort(dist_mat_cos[, i], decreasing = T)[1])
+  Top1_Similar_Hotel[i] = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1]
+  
+  dist_mat_cos_df = data.frame(sort(dist_mat_cos[, i], decreasing = T)[2])
+  Top2_Similar_Hotel[i] = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1]
+  
+  dist_mat_cos_df = data.frame(sort(dist_mat_cos[, i], decreasing = T)[3])
+  Top3_Similar_Hotel[i] = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1]
+  
+  dist_mat_cos_df = data.frame(sort(dist_mat_cos[, i], decreasing = T)[4])
+  Top4_Similar_Hotel[i] = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1]
+  
+  dist_mat_cos_df = data.frame(sort(dist_mat_cos[, i], decreasing = T)[5])
+  Top5_Similar_Hotel[i] = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1]
+}
+
+df_cb <- data.frame(Top1_Similar_Hotel, 
+                    Top2_Similar_Hotel, 
+                    Top3_Similar_Hotel, 
+                    Top4_Similar_Hotel, 
+                    Top5_Similar_Hotel, stringsAsFactors = TRUE)
+rownames(df_cb) = airbnb_Hotels_mining[,1]
+write.csv(df_cb, file = "Content Based Recommended Hotel For each Hotel using euclidean.csv")
+
+### correlation is nothing but pearson's correlation
+dist_mat_cos <- as.matrix(dist(mat_ti, method = "correlation"))
+dist_mat_cos_df = data.frame(sort(dist_mat_cos[, 1], decreasing = T)[1:10])
+p = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1] 
+dist_mat_cos_df
+
+Top1_Similar_Hotel = integer(nrow(airbnb_Hotels_mining))
+Top2_Similar_Hotel = integer(nrow(airbnb_Hotels_mining))
+Top3_Similar_Hotel = integer(nrow(airbnb_Hotels_mining))
+Top4_Similar_Hotel = integer(nrow(airbnb_Hotels_mining))
+Top5_Similar_Hotel = integer(nrow(airbnb_Hotels_mining))
+
+for (i in 1:nrow(airbnb_Hotels_mining)) {
+  target = airbnb_Hotels_mining[rownames(airbnb_Hotels_mining)[i],1]
+  dist_mat_cos_df = data.frame(sort(dist_mat_cos[, i], decreasing = T)[1])
+  Top1_Similar_Hotel[i] = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1]
+  
+  dist_mat_cos_df = data.frame(sort(dist_mat_cos[, i], decreasing = T)[2])
+  Top2_Similar_Hotel[i] = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1]
+  
+  dist_mat_cos_df = data.frame(sort(dist_mat_cos[, i], decreasing = T)[3])
+  Top3_Similar_Hotel[i] = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1]
+  
+  dist_mat_cos_df = data.frame(sort(dist_mat_cos[, i], decreasing = T)[4])
+  Top4_Similar_Hotel[i] = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1]
+  
+  dist_mat_cos_df = data.frame(sort(dist_mat_cos[, i], decreasing = T)[5])
+  Top5_Similar_Hotel[i] = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1]
+}
+
+df_cb <- data.frame(Top1_Similar_Hotel, 
+                    Top2_Similar_Hotel, 
+                    Top3_Similar_Hotel, 
+                    Top4_Similar_Hotel, 
+                    Top5_Similar_Hotel, stringsAsFactors = TRUE)
+rownames(df_cb) = airbnb_Hotels_mining[,1]
+write.csv(df_cb, file = "Content Based Recommended Hotel For each Hotel using correlation.csv")
+
+dist_mat_cos <- as.matrix(dist(mat_ti, method = "jaccard"))
+dist_mat_cos_df = data.frame(sort(dist_mat_cos[, 1], decreasing = T)[1:10])
+j = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1] 
+dist_mat_cos_df
+
+Top1_Similar_Hotel = integer(nrow(airbnb_Hotels_mining))
+Top2_Similar_Hotel = integer(nrow(airbnb_Hotels_mining))
+Top3_Similar_Hotel = integer(nrow(airbnb_Hotels_mining))
+Top4_Similar_Hotel = integer(nrow(airbnb_Hotels_mining))
+Top5_Similar_Hotel = integer(nrow(airbnb_Hotels_mining))
+
+for (i in 1:nrow(airbnb_Hotels_mining)) {
+  target = airbnb_Hotels_mining[rownames(airbnb_Hotels_mining)[i],1]
+  dist_mat_cos_df = data.frame(sort(dist_mat_cos[, i], decreasing = T)[1])
+  Top1_Similar_Hotel[i] = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1]
+  
+  dist_mat_cos_df = data.frame(sort(dist_mat_cos[, i], decreasing = T)[2])
+  Top2_Similar_Hotel[i] = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1]
+  
+  dist_mat_cos_df = data.frame(sort(dist_mat_cos[, i], decreasing = T)[3])
+  Top3_Similar_Hotel[i] = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1]
+  
+  dist_mat_cos_df = data.frame(sort(dist_mat_cos[, i], decreasing = T)[4])
+  Top4_Similar_Hotel[i] = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1]
+  
+  dist_mat_cos_df = data.frame(sort(dist_mat_cos[, i], decreasing = T)[5])
+  Top5_Similar_Hotel[i] = airbnb_Hotels_mining[rownames(dist_mat_cos_df),1]
+}
+
+df_cb <- data.frame(Top1_Similar_Hotel, 
+                    Top2_Similar_Hotel, 
+                    Top3_Similar_Hotel, 
+                    Top4_Similar_Hotel, 
+                    Top5_Similar_Hotel, stringsAsFactors = TRUE)
+rownames(df_cb) = airbnb_Hotels_mining[,1]
+write.csv(df_cb, file = "Content Based Recommended Hotel For each Hotel using jaccard.csv")
+
+union(union(union(c,e),p),j)
+i1 = intersect(c,e)
+i2 = intersect(c,p)
+i3 = intersect(c,j)
+i4 = intersect(e,p)
+i5 = intersect(e,j)
+i6 = intersect(p,j)
+union(union(union(union(union(i1,i2),i3),i4),i5),i6)
+```
+
+### 
+
+View
+
+
