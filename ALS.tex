@@ -1,0 +1,1344 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={Matrix\_Factorization},
+            pdfauthor={Mritunjay And Sunil},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{Matrix\_Factorization}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{Mritunjay And Sunil}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+      \predate{\centering\large\emph}
+  \postdate{\par}
+    \date{15/10/2019}
+
+
+\begin{document}
+\maketitle
+
+\hypertarget{recommended-system-techniques-on-airbnb-amsterdam-hotel-recommendation}{%
+\section{Recommended System Techniques on Airbnb (Amsterdam Hotel
+Recommendation)}\label{recommended-system-techniques-on-airbnb-amsterdam-hotel-recommendation}}
+
+\hypertarget{alternating-least-squares-for-recommendation-system}{%
+\section{1. Alternating Least Squares for Recommendation
+System}\label{alternating-least-squares-for-recommendation-system}}
+
+\hypertarget{load-all-the-user-build-functions}{%
+\subsubsection{Load all the User build
+functions}\label{load-all-the-user-build-functions}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Make recommendations for the target user using User-based CF}
+\NormalTok{getrecommendations_UU <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(targetuser, users, }\DataTypeTok{topN=}\DecValTok{5}\NormalTok{, }\DataTypeTok{simfun=}\NormalTok{pearsonsim) \{}
+\NormalTok{  sims =}\StringTok{ }\KeywordTok{apply}\NormalTok{(users,}\DecValTok{1}\NormalTok{,}\ControlFlowTok{function}\NormalTok{(user) }\KeywordTok{simfun}\NormalTok{(user,targetuser)) }
+\NormalTok{  sims =}\StringTok{ }\NormalTok{sims[}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(sims) }\OperatorTok{&}\StringTok{ }\NormalTok{sims }\OperatorTok{>=}\DecValTok{0}\NormalTok{]}
+\NormalTok{  wavrats =}\StringTok{ }\KeywordTok{apply}\NormalTok{(users[}\KeywordTok{names}\NormalTok{(sims),}\KeywordTok{is.na}\NormalTok{(targetuser), }\DataTypeTok{drop=}\OtherTok{FALSE}\NormalTok{],}\DecValTok{2}\NormalTok{,}\ControlFlowTok{function}\NormalTok{(rats) }\KeywordTok{weighted.mean}\NormalTok{(rats, sims, }\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{))}
+\NormalTok{  s =}\StringTok{ }\KeywordTok{sort}\NormalTok{(wavrats[}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(wavrats)], }\DataTypeTok{decreasing =} \OtherTok{TRUE}\NormalTok{)}
+  \ControlFlowTok{if}\NormalTok{ (topN }\OperatorTok{==}\StringTok{ }\OtherTok{FALSE}\NormalTok{) s }\ControlFlowTok{else}\NormalTok{ s[}\DecValTok{1}\OperatorTok{:}\KeywordTok{min}\NormalTok{(topN,}\KeywordTok{length}\NormalTok{(s))] }\CommentTok{# get topN items}
+\NormalTok{\}}
+\CommentTok{#getrecommendations_UU = cmpfun(getrecommendations_UU)}
+
+\CommentTok{# get recommedations for the target user using Item-based CF}
+\NormalTok{getrecommendations_II <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(targetuser, itemsims, }\DataTypeTok{topN=}\DecValTok{5}\NormalTok{) \{}
+\NormalTok{  targetuser =}\StringTok{ }\NormalTok{targetuser[}\KeywordTok{colnames}\NormalTok{(itemsims)] }\CommentTok{# ensure the item order is the same as simmatrix}
+\NormalTok{  seenitems  =}\StringTok{ }\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(targetuser)}
+\NormalTok{  unseenitems =}\StringTok{ }\KeywordTok{is.na}\NormalTok{(targetuser)}
+\NormalTok{  seenrats =}\StringTok{ }\NormalTok{targetuser[seenitems]}
+\NormalTok{  preds =}\StringTok{ }\KeywordTok{apply}\NormalTok{(itemsims[unseenitems,seenitems, }\DataTypeTok{drop=}\OtherTok{FALSE}\NormalTok{], }\DecValTok{1}\NormalTok{, }\ControlFlowTok{function}\NormalTok{(simrow) }\KeywordTok{my.weighted.mean}\NormalTok{(seenrats, simrow))}
+\NormalTok{  sp =}\StringTok{ }\KeywordTok{sort}\NormalTok{(preds[}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(preds)] , }\DataTypeTok{decreasing =} \OtherTok{TRUE}\NormalTok{)}
+\NormalTok{  sp[}\DecValTok{1}\OperatorTok{:}\KeywordTok{min}\NormalTok{(topN,}\KeywordTok{length}\NormalTok{(sp))]  }\CommentTok{# get topN items}
+\NormalTok{\}}
+\CommentTok{#getrecommendations_II = cmpfun(getrecommendations_II)}
+
+\CommentTok{# compute the item-item similarity matrix (the matrix is symmetric so can compute half & then copy)}
+\CommentTok{# (setting dir=1 generates the user similarity matrix)}
+\NormalTok{getitemsimsmatrix =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(users, }\DataTypeTok{simfun=}\NormalTok{cosinesim, }\DataTypeTok{dir=}\DecValTok{2}\NormalTok{) \{}
+\NormalTok{  rw <<-}\StringTok{ }\DecValTok{1}\NormalTok{; }
+\NormalTok{  itemsims =}\StringTok{ }\KeywordTok{apply}\NormalTok{(users, dir, }\ControlFlowTok{function}\NormalTok{(itemA) \{}
+\NormalTok{    rw <<-}\StringTok{ }\NormalTok{rw }\OperatorTok{+}\StringTok{ }\DecValTok{1}\NormalTok{ ; cl <<-}\StringTok{ }\DecValTok{1}\NormalTok{; }
+    \KeywordTok{apply}\NormalTok{(users,dir,}\ControlFlowTok{function}\NormalTok{(itemB) \{cl<<-cl}\OperatorTok{+}\DecValTok{1}\NormalTok{; }\ControlFlowTok{if}\NormalTok{ (cl}\OperatorTok{<}\NormalTok{rw) }\OtherTok{NA} \ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (cl}\OperatorTok{==}\NormalTok{rw) }\OtherTok{NA} \ControlFlowTok{else} \KeywordTok{simfun}\NormalTok{(itemA,itemB)\})}
+\NormalTok{  \})}
+\NormalTok{  m =}\StringTok{ }\KeywordTok{forceSymmetric}\NormalTok{(itemsims,}\DataTypeTok{uplo=}\StringTok{"L"}\NormalTok{) }\CommentTok{# copy lower half to upper half}
+  \KeywordTok{as.matrix}\NormalTok{(m)}
+\NormalTok{\}}
+\CommentTok{#getitemsimsmatrix = cmpfun(getitemsimsmatrix)}
+
+\CommentTok{# similarity functions}
+\NormalTok{euclidsim =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x,y) \{ z=(y}\OperatorTok{-}\NormalTok{x)}\OperatorTok{^}\DecValTok{2}\NormalTok{; sz=}\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{sum}\NormalTok{(z,}\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{));}
+                            \ControlFlowTok{if}\NormalTok{ (sz}\OperatorTok{!=}\DecValTok{0}\NormalTok{) }\DecValTok{1}\OperatorTok{/}\NormalTok{(}\DecValTok{1}\OperatorTok{+}\NormalTok{sz) }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (}\KeywordTok{length}\NormalTok{(}\KeywordTok{which}\NormalTok{(}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(z)))}\OperatorTok{==}\DecValTok{0}\NormalTok{) }\OtherTok{NA} \ControlFlowTok{else} \DecValTok{1}\OperatorTok{/}\NormalTok{(}\DecValTok{1}\OperatorTok{+}\NormalTok{sz)\}}
+
+\NormalTok{euclidsimF=}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x,y) \{ z=(y}\OperatorTok{-}\NormalTok{x)}\OperatorTok{^}\DecValTok{2}\NormalTok{; sz=}\KeywordTok{sum}\NormalTok{(z,}\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{);}
+                            \ControlFlowTok{if}\NormalTok{ (sz}\OperatorTok{!=}\DecValTok{0}\NormalTok{) }\DecValTok{1}\OperatorTok{/}\NormalTok{(}\DecValTok{1}\OperatorTok{+}\NormalTok{sz) }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (}\KeywordTok{length}\NormalTok{(}\KeywordTok{which}\NormalTok{(}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(z)))}\OperatorTok{==}\DecValTok{0}\NormalTok{) }\OtherTok{NA} \ControlFlowTok{else} \DecValTok{1}\OperatorTok{/}\NormalTok{(}\DecValTok{1}\OperatorTok{+}\NormalTok{sz)\} }
+
+\NormalTok{cosinesim =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x,y) \{ xy =}\StringTok{ }\NormalTok{x}\OperatorTok{*}\NormalTok{y; }\KeywordTok{sum}\NormalTok{(xy, }\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{)}\OperatorTok{/}\NormalTok{(}\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{sum}\NormalTok{(x[}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(xy)]}\OperatorTok{^}\DecValTok{2}\NormalTok{)}\OperatorTok{*}\KeywordTok{sum}\NormalTok{(y[}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(xy)]}\OperatorTok{^}\DecValTok{2}\NormalTok{)))\}}
+
+\NormalTok{pearsonsim=}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x,y) \{ }\KeywordTok{suppressWarnings}\NormalTok{(}\KeywordTok{cor}\NormalTok{(}\KeywordTok{unlist}\NormalTok{(x),}\KeywordTok{unlist}\NormalTok{(y),}\DataTypeTok{use=}\StringTok{"pairwise.complete.obs"}\NormalTok{)) \}}
+
+\NormalTok{mypearsim =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x,y) \{ xy =}\StringTok{ }\NormalTok{x}\OperatorTok{*}\NormalTok{y; x=x[}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(xy)]; y=y[}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(xy)]; }
+\NormalTok{                            mx=}\KeywordTok{mean}\NormalTok{(x); my=}\KeywordTok{mean}\NormalTok{(y);}
+                            \KeywordTok{sum}\NormalTok{((x}\OperatorTok{-}\NormalTok{mx)}\OperatorTok{*}\NormalTok{(y}\OperatorTok{-}\NormalTok{my))}\OperatorTok{/}\NormalTok{(}\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{sum}\NormalTok{((x}\OperatorTok{-}\NormalTok{mx)}\OperatorTok{^}\DecValTok{2}\NormalTok{)}\OperatorTok{*}\KeywordTok{sum}\NormalTok{((y}\OperatorTok{-}\NormalTok{my)}\OperatorTok{^}\DecValTok{2}\NormalTok{)))\}}
+
+\NormalTok{pearsonRM =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x,y) \{ mx=}\KeywordTok{mean}\NormalTok{(x,}\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{);my=}\KeywordTok{mean}\NormalTok{(y,}\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{);}
+\NormalTok{                            xy=x}\OperatorTok{*}\NormalTok{y;x=x[}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(xy)]; y=y[}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(xy)]}
+                            \KeywordTok{sum}\NormalTok{((x}\OperatorTok{-}\NormalTok{mx)}\OperatorTok{*}\NormalTok{(y}\OperatorTok{-}\NormalTok{my))}\OperatorTok{/}\NormalTok{(}\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{sum}\NormalTok{((x}\OperatorTok{-}\NormalTok{mx)}\OperatorTok{^}\DecValTok{2}\NormalTok{)}\OperatorTok{*}\KeywordTok{sum}\NormalTok{((y}\OperatorTok{-}\NormalTok{my)}\OperatorTok{^}\DecValTok{2}\NormalTok{)))\}}
+
+\NormalTok{jacardsim =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x,y) \{ validx=}\StringTok{ }\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(x); validy=}\StringTok{ }\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(y); }
+                            \KeywordTok{sum}\NormalTok{(}\KeywordTok{as.integer}\NormalTok{(validx}\OperatorTok{&}\NormalTok{validy))}\OperatorTok{/}\KeywordTok{sum}\NormalTok{(}\KeywordTok{as.integer}\NormalTok{(validx}\OperatorTok{|}\NormalTok{validy))\}}
+
+\CommentTok{###############################################################################}
+\CommentTok{# For testing, we split the data by user, so test users are not in the trainset}
+\CommentTok{# This is clean but does not test the situation where partial information }
+\CommentTok{# is known about a user (as may be the case in User-based scenario).}
+\CommentTok{# For item-based having partial info will make very little difference (since simmatrix is precomputed)}
+\CommentTok{###############################################################################}
+
+\CommentTok{# make predicted ratings for a sample of items for each test user}
+\CommentTok{# if trainusers is defined then do User-based CF else do Item-based CF}
+\CommentTok{# Note: if Item-based CF is to be performed them the itemsimilarity matrix (itemsims) must be defined}
+\NormalTok{predictCF =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(testusers, }\DataTypeTok{trainusers=}\OtherTok{NULL}\NormalTok{, }\DataTypeTok{itemsims=}\OtherTok{NULL}\NormalTok{, }\DataTypeTok{numtestitems=}\DecValTok{10}\NormalTok{, }\DataTypeTok{random=}\OtherTok{FALSE}\NormalTok{, }\DataTypeTok{simfun=}\NormalTok{cosinesim) \{}
+\NormalTok{  preds =}\StringTok{ }\KeywordTok{sapply}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(testusers),}\ControlFlowTok{function}\NormalTok{(i) \{}
+    \KeywordTok{cat}\NormalTok{(}\StringTok{"."}\NormalTok{)}
+    \KeywordTok{predictuser}\NormalTok{(testusers[i,],}\DataTypeTok{trainusers=}\NormalTok{trainusers,}\DataTypeTok{itemsims=}\NormalTok{itemsims,}\DataTypeTok{numtestitems=}\NormalTok{numtestitems,}\DataTypeTok{random=}\NormalTok{random,}\DataTypeTok{simfun=}\NormalTok{simfun)\})}
+  \KeywordTok{colnames}\NormalTok{(preds) =}\StringTok{ }\KeywordTok{rownames}\NormalTok{(testusers)}
+\NormalTok{  preds}
+\NormalTok{\}}
+
+\NormalTok{predictuser <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(testuser, }\DataTypeTok{trainusers=}\OtherTok{NULL}\NormalTok{, }\DataTypeTok{itemsims=}\OtherTok{NULL}\NormalTok{, }\DataTypeTok{numtestitems=}\DecValTok{10}\NormalTok{, }\DataTypeTok{random=}\OtherTok{FALSE}\NormalTok{, }\DataTypeTok{simfun=}\NormalTok{cosinesim) \{}
+\NormalTok{  seenitemnames   =}\StringTok{ }\KeywordTok{names}\NormalTok{(testuser)[}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(testuser)]}
+  \ControlFlowTok{if}\NormalTok{ (random) testitemnames =}\StringTok{ }\KeywordTok{sample}\NormalTok{(seenitemnames,}\KeywordTok{min}\NormalTok{(numtestitems,}\KeywordTok{length}\NormalTok{(seenitemnames))) }\CommentTok{# test a random N items}
+  \ControlFlowTok{else}\NormalTok{ testitemnames =}\StringTok{ }\NormalTok{seenitemnames[}\DecValTok{1}\OperatorTok{:}\KeywordTok{min}\NormalTok{(numtestitems,}\KeywordTok{length}\NormalTok{(seenitemnames))] }\CommentTok{# test first N items}
+\NormalTok{  preds =}\StringTok{ }\KeywordTok{list}\NormalTok{()}
+  \ControlFlowTok{for}\NormalTok{ (testitemname }\ControlFlowTok{in}\NormalTok{ testitemnames) \{}
+\NormalTok{    truerating =}\StringTok{ }\NormalTok{testuser[testitemname] }
+\NormalTok{    testuser[testitemname] =}\StringTok{ }\OtherTok{NA}
+    \ControlFlowTok{if}\NormalTok{ (}\OperatorTok{!}\KeywordTok{is.null}\NormalTok{(trainusers)) \{}
+      \CommentTok{# do user-based CF}
+\NormalTok{      usersims =}\StringTok{ }\KeywordTok{apply}\NormalTok{(trainusers,}\DecValTok{1}\NormalTok{,}\ControlFlowTok{function}\NormalTok{(trainuser) }\KeywordTok{simfun}\NormalTok{(trainuser,testuser))}
+\NormalTok{      usersims =}\StringTok{ }\NormalTok{usersims[}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(usersims) }\OperatorTok{&}\StringTok{ }\NormalTok{usersims }\OperatorTok{>=}\DecValTok{0}\NormalTok{]}
+\NormalTok{      predictedrating =}\StringTok{ }\KeywordTok{my.weighted.mean}\NormalTok{(trainusers[}\KeywordTok{names}\NormalTok{(usersims),testitemname], usersims)}
+\NormalTok{    \}}
+    \ControlFlowTok{else}\NormalTok{ \{}
+      \CommentTok{# do item-based CF}
+\NormalTok{      predictedrating =}\StringTok{ }\KeywordTok{my.weighted.mean}\NormalTok{(testuser[seenitemnames], itemsims[seenitemnames,testitemname])}
+\NormalTok{    \}}
+\NormalTok{    testuser[testitemname] =}\StringTok{ }\NormalTok{truerating }\CommentTok{# restore the actual rating}
+\NormalTok{    preds =}\StringTok{ }\KeywordTok{c}\NormalTok{(preds,predictedrating,truerating)}
+\NormalTok{  \}}
+\NormalTok{  preds =}\StringTok{ }\KeywordTok{unname}\NormalTok{(preds)}
+\NormalTok{  m =}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(preds)}
+  \ControlFlowTok{if}\NormalTok{ (}\KeywordTok{length}\NormalTok{(m) }\OperatorTok{<}\StringTok{ }\NormalTok{numtestitems}\OperatorTok{*}\DecValTok{2}\NormalTok{) }\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in}\NormalTok{ (}\KeywordTok{length}\NormalTok{(m)}\OperatorTok{+}\DecValTok{1}\NormalTok{)}\OperatorTok{:}\NormalTok{(numtestitems}\OperatorTok{*}\DecValTok{2}\NormalTok{)) \{ m =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(m,}\OtherTok{NA}\NormalTok{)\}}
+  \KeywordTok{return}\NormalTok{(m)}
+\NormalTok{\}}
+\CommentTok{#predictuser= cmpfun(predictuser)}
+
+\CommentTok{# a weighted mean that handles NA's in both arguments (ratings and similarities)}
+\NormalTok{my.weighted.mean =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x,y) \{}
+\NormalTok{    xy =}\StringTok{ }\NormalTok{x}\OperatorTok{*}\NormalTok{y; }
+\NormalTok{    z =}\StringTok{ }\KeywordTok{sum}\NormalTok{(}\KeywordTok{abs}\NormalTok{(y[}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(xy)]))}
+    \ControlFlowTok{if}\NormalTok{ (z }\OperatorTok{==}\StringTok{ }\DecValTok{0}\NormalTok{) }\KeywordTok{as.numeric}\NormalTok{(}\OtherTok{NA}\NormalTok{) }\ControlFlowTok{else} \KeywordTok{sum}\NormalTok{(xy,}\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{)}\OperatorTok{/}\NormalTok{z }
+\NormalTok{\}}
+\CommentTok{#my.weighted.mean = cmpfun(my.weighted.mean)}
+
+\CommentTok{# computes average, mean absolute error}
+\CommentTok{# each row contains prediction, actual, prediction, actual etc, hence errors are just the diff between consecutive cells}
+\NormalTok{avgMAE =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(preds) \{}
+\NormalTok{  plist =}\StringTok{ }\KeywordTok{unlist}\NormalTok{(preds)}
+\NormalTok{  errors =}\StringTok{ }\KeywordTok{sapply}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\NormalTok{(}\KeywordTok{length}\NormalTok{(plist)}\OperatorTok{/}\DecValTok{2}\NormalTok{),}\ControlFlowTok{function}\NormalTok{(i) }\KeywordTok{abs}\NormalTok{(plist[i}\OperatorTok{*}\DecValTok{2-1}\NormalTok{]}\OperatorTok{-}\NormalTok{plist[i}\OperatorTok{*}\DecValTok{2}\NormalTok{]))}
+\NormalTok{  errors =}\StringTok{ }\NormalTok{errors[errors }\OperatorTok{!=}\StringTok{ }\OtherTok{Inf}\NormalTok{]}
+  \KeywordTok{mean}\NormalTok{(errors,}\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{)}
+\NormalTok{\}}
+
+\NormalTok{showCM =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(preds, like) \{}
+\NormalTok{  plist =}\StringTok{ }\KeywordTok{unlist}\NormalTok{(preds)}
+\NormalTok{  cnts =}\StringTok{ }\KeywordTok{sapply}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\NormalTok{(}\KeywordTok{length}\NormalTok{(plist)}\OperatorTok{/}\DecValTok{2}\NormalTok{), }\ControlFlowTok{function}\NormalTok{(i) \{}
+\NormalTok{    pred =}\StringTok{ }\NormalTok{plist[i}\OperatorTok{*}\DecValTok{2-1}\NormalTok{] ; actual =}\StringTok{ }\NormalTok{plist[i}\OperatorTok{*}\DecValTok{2}\NormalTok{]}
+    \ControlFlowTok{if}\NormalTok{ (}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(pred) }\OperatorTok{&}\StringTok{ }\OperatorTok{!}\KeywordTok{is.nan}\NormalTok{(actual)) \{}
+      \ControlFlowTok{if}\NormalTok{ (pred}\OperatorTok{>=}\NormalTok{like) \{}\ControlFlowTok{if}\NormalTok{(actual}\OperatorTok{>=}\NormalTok{like) }\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{) }\ControlFlowTok{else} \KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{)\}}
+      \ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{(actual}\OperatorTok{<}\NormalTok{like) }\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{0}\NormalTok{) }\ControlFlowTok{else} \KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{) }
+\NormalTok{    \} }\ControlFlowTok{else} \KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{)}
+\NormalTok{  \})}
+\NormalTok{  s =}\StringTok{ }\KeywordTok{rowSums}\NormalTok{(cnts)   }\CommentTok{#returns cnts for: TP, FP, TN, FN}
+
+  \KeywordTok{cat}\NormalTok{(}\KeywordTok{sprintf}\NormalTok{(}\StringTok{"TN=%5d FP=%5d}\CharTok{\textbackslash{}n}\StringTok{"}\NormalTok{,s[}\DecValTok{3}\NormalTok{],s[}\DecValTok{2}\NormalTok{]))}
+  \KeywordTok{cat}\NormalTok{(}\KeywordTok{sprintf}\NormalTok{(}\StringTok{"FN=%5d TP=%5d  (total=%d)}\CharTok{\textbackslash{}n}\StringTok{"}\NormalTok{,s[}\DecValTok{4}\NormalTok{],s[}\DecValTok{1}\NormalTok{], }\KeywordTok{sum}\NormalTok{(s)))}
+  \KeywordTok{cat}\NormalTok{(}\KeywordTok{sprintf}\NormalTok{(}\StringTok{"accuracy  = %0.1f%%}\CharTok{\textbackslash{}n}\StringTok{"}\NormalTok{,(s[}\DecValTok{1}\NormalTok{]}\OperatorTok{+}\NormalTok{s[}\DecValTok{3}\NormalTok{])}\OperatorTok{*}\DecValTok{100}\OperatorTok{/}\KeywordTok{sum}\NormalTok{(s)))}
+  \KeywordTok{cat}\NormalTok{(}\KeywordTok{sprintf}\NormalTok{(}\StringTok{"precision = %3.1f%%}\CharTok{\textbackslash{}n}\StringTok{"}\NormalTok{,s[}\DecValTok{1}\NormalTok{]}\OperatorTok{*}\DecValTok{100}\OperatorTok{/}\NormalTok{(s[}\DecValTok{1}\NormalTok{]}\OperatorTok{+}\NormalTok{s[}\DecValTok{2}\NormalTok{])))}
+  \KeywordTok{cat}\NormalTok{(}\KeywordTok{sprintf}\NormalTok{(}\StringTok{"recall    = %3.1f%%}\CharTok{\textbackslash{}n}\StringTok{"}\NormalTok{,s[}\DecValTok{1}\NormalTok{]}\OperatorTok{*}\DecValTok{100}\OperatorTok{/}\NormalTok{(s[}\DecValTok{1}\NormalTok{]}\OperatorTok{+}\NormalTok{s[}\DecValTok{4}\NormalTok{])))}
+\NormalTok{\}}
+
+\CommentTok{#######################}
+\CommentTok{# miscellaneous aids}
+\CommentTok{#######################}
+
+\NormalTok{maketraintest =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(users,numtestusers) \{}
+\NormalTok{  testnames  =}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\KeywordTok{rownames}\NormalTok{(users), }\KeywordTok{min}\NormalTok{(numtestusers,}\KeywordTok{nrow}\NormalTok{(users))) }\CommentTok{# identify N users randomly for testing}
+\NormalTok{  trainnames =}\StringTok{ }\KeywordTok{setdiff}\NormalTok{(}\KeywordTok{rownames}\NormalTok{(users),testnames) }\CommentTok{# take remaining users for training}
+\NormalTok{  trainusers <<-}\StringTok{ }\NormalTok{users[trainnames,]}
+\NormalTok{  testusers  <<-}\StringTok{ }\NormalTok{users[testnames,]}
+  \KeywordTok{list}\NormalTok{(trainusers,testusers)}
+\NormalTok{\}}
+
+\CommentTok{# extract only prediction or only actual ratings from the output of predictCF()}
+\NormalTok{listpreds=}\StringTok{ }\ControlFlowTok{function}\NormalTok{(results) \{}\KeywordTok{unlist}\NormalTok{(results)[}\KeywordTok{c}\NormalTok{(}\OtherTok{TRUE}\NormalTok{,}\OtherTok{FALSE}\NormalTok{)]\}}
+\NormalTok{listrats =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(results) \{}\KeywordTok{unlist}\NormalTok{(results)[}\KeywordTok{c}\NormalTok{(}\OtherTok{FALSE}\NormalTok{,}\OtherTok{TRUE}\NormalTok{)]\}}
+\NormalTok{validcnt =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{length}\NormalTok{(}\KeywordTok{which}\NormalTok{(}\KeywordTok{is.finite}\NormalTok{(x)))}
+
+\CommentTok{# How sparse is the data in a data frame? Compute % of non-blank entries}
+\NormalTok{fillrate =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(df) \{}\KeywordTok{cat}\NormalTok{((}\KeywordTok{length}\NormalTok{(}\KeywordTok{which}\NormalTok{(}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(df)))}\OperatorTok{*}\DecValTok{100}\NormalTok{)}\OperatorTok{/}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(df)}\OperatorTok{*}\KeywordTok{ncol}\NormalTok{(df)),}\StringTok{"%"}\NormalTok{)\}}
+\CommentTok{#fillrate = cmpfun(fillrate)}
+
+\CommentTok{# same as above but also works on vectors}
+\NormalTok{fillratev =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(df) \{t=}\KeywordTok{unlist}\NormalTok{(df); }\KeywordTok{cat}\NormalTok{((}\KeywordTok{length}\NormalTok{(}\KeywordTok{which}\NormalTok{(}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(t)))}\OperatorTok{*}\DecValTok{100}\NormalTok{)}\OperatorTok{/}\KeywordTok{length}\NormalTok{(t),}\StringTok{"%"}\NormalTok{)\}}
+\CommentTok{#fillratev = cmpfun(fillratev)}
+
+\CommentTok{# how many values are > 0? Compute % of entries > 0}
+\NormalTok{fillrateG =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(df,thresh) \{t=}\KeywordTok{unlist}\NormalTok{(df); }\KeywordTok{cat}\NormalTok{((}\KeywordTok{length}\NormalTok{(}\KeywordTok{which}\NormalTok{(}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(t) }\OperatorTok{&}\StringTok{ }\NormalTok{t }\OperatorTok{>}\StringTok{ }\NormalTok{thresh))}\OperatorTok{*}\DecValTok{100}\NormalTok{)}\OperatorTok{/}\KeywordTok{length}\NormalTok{(t),}\StringTok{"%"}\NormalTok{)\}}
+\NormalTok{fillrateL =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(df,thresh) \{t=}\KeywordTok{unlist}\NormalTok{(df); }\KeywordTok{cat}\NormalTok{((}\KeywordTok{length}\NormalTok{(}\KeywordTok{which}\NormalTok{(}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(t) }\OperatorTok{&}\StringTok{ }\NormalTok{t }\OperatorTok{<}\StringTok{ }\NormalTok{thresh))}\OperatorTok{*}\DecValTok{100}\NormalTok{)}\OperatorTok{/}\KeywordTok{length}\NormalTok{(t),}\StringTok{"%"}\NormalTok{)\}}
+\NormalTok{fillrateE =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(df,thresh) \{t=}\KeywordTok{unlist}\NormalTok{(df); }\KeywordTok{cat}\NormalTok{((}\KeywordTok{length}\NormalTok{(}\KeywordTok{which}\NormalTok{(}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(t) }\OperatorTok{&}\StringTok{ }\NormalTok{t }\OperatorTok{==}\StringTok{ }\NormalTok{thresh))}\OperatorTok{*}\DecValTok{100}\NormalTok{)}\OperatorTok{/}\KeywordTok{length}\NormalTok{(t),}\StringTok{"%"}\NormalTok{)\}}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{load-all-the-relevant-libraries-and-get-the-working-directory-and-load-the-amsterdam-hotel-airbn-data-set}{%
+\subsubsection{Load all the relevant libraries and Get the working
+directory and Load the Amsterdam Hotel Airbn data
+set}\label{load-all-the-relevant-libraries-and-get-the-working-directory-and-load-the-amsterdam-hotel-airbn-data-set}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pacman}\OperatorTok{::}\KeywordTok{p_load}\NormalTok{(tidyverse, purrr, stringr, data.table, modelr, readxl,caret, corrplot, broom, ggpubr, tm, proxy, MASS,relaimpo, car,interplot, caTools, mice, gbm, reshape2, compiler, recommenderlab, Matrix, knitr,tidyr, dplyr, animation, wordnet, RColorBrewer, wordcloud, SnowballC, topicmodels, ggplot2, cluster, fpc, recosystem, dtplyr,softImpute)}
+\KeywordTok{getwd}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "C:/Users/Rapsy/Desktop/Recommender_Assignment/MJ/Model Based Recommendation System"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{airbnb =}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"airbnb.csv"}\NormalTok{, }\DataTypeTok{header=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{sep=}\StringTok{","}\NormalTok{) }\CommentTok{# transaction format!}
+\KeywordTok{names}\NormalTok{(airbnb) =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\KeywordTok{colnames}\NormalTok{(airbnb))}
+\KeywordTok{head}\NormalTok{(airbnb,}\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   Hotel_Id        Host_Name User_Id User_Name
+## 1     2818 Erik And Mary Jo 2914515     Ivana
+##                                 Hotel_name
+## 1 Quiet Garden View Room & Super Fast WiFi
+##                                    summary
+## 1 Quiet Garden View Room & Super Fast WiFi
+##                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         space
+## 1 I'm renting a bedroom (room overlooking the garden) in my apartment in Amsterdam,  The room is located to the east of the city centre in a quiet, typical Amsterdam neighbourhood the "Indische Buurt". AmsterdamÃ¢\200\231s historic centre is less than 15 minutes away by bike or tram. The features of the room are: - Twin beds (80 x 200 cm, down quilts and pillows)  - 2 pure cotton towels for each guest  - reading lamps - bedside table - wardrobe - table with chairs - tea and coffee making facilities - mini bar - alarm clock - Hi-Fi system with cd player, connection for mp3 player / phone - map of Amsterdam and public transport - Wi-Fi Internet connection  Extra services: - Bike rental
+##                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  description
+## 1 Quiet Garden View Room & Super Fast WiFi I'm renting a bedroom (room overlooking the garden) in my apartment in Amsterdam,  The room is located to the east of the city centre in a quiet, typical Amsterdam neighbourhood the "Indische Buurt". AmsterdamÃ¢\200\231s historic centre is less than 15 minutes away by bike or tram. The features of the room are: - Twin beds (80 x 200 cm, down quilts and pillows)  - 2 pure cotton towels for each guest  - reading lamps - bedside table - wardrobe - table with chairs - tea and coffee making facilities - mini bar - alarm clock - Hi-Fi system with cd player, connection for mp3 player / phone - map of Amsterdam and public transport - Wi-Fi Internet connection  Extra services: - Bike rental Indische Buurt ("Indies Neighborhood") is a neighbourhood in the eastern portion of the city of Amsterdam, in the Dutch province of Noord-Holland. The name dates from the early 20th century and is derived from the fact that the neighbourhood's streets are named after islands a
+##   host_id host_name property_type    room_type accommodates
+## 1 4070804    Daniel     Apartment Private room   Two Person
+##             bathrooms    bedrooms    beds bed_type
+## 1 One attach bathroom One bedroom One bed Real Bed
+##                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            amenities
+## 1 {Internet,Wifi,"Paid parking off premises","Buzzer/wireless intercom",Heating,Washer,"Smoke detector","Carbon monoxide detector","First aid kit","Safety card","Fire extinguisher",Essentials,Shampoo,"Lock on bedroom door","24-hour check-in",Hangers,"Hair dryer",Iron,"Laptop friendly workspace","translation missing: en.hosting_amenity_49","translation missing: en.hosting_amenity_50","Private entrance","Hot water","Bed linens","Extra pillows and blankets","Single level home","Garden or backyard","No stairs or steps to enter","Flat path to guest entrance","Well-lit path to entrance","No stairs or steps to enter","Accessible-height bed","No stairs or steps to enter","Host greets you","Handheld shower head","Paid parking on premises"}
+##           cancellation_policy Ratings
+## 1 strict_14_with_grace_period       3
+\end{verbatim}
+
+\hypertarget{structure-of-datasets}{%
+\subsubsection{Structure of Datasets}\label{structure-of-datasets}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{str}\NormalTok{(airbnb)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 'data.frame':    20677 obs. of  20 variables:
+##  $ Hotel_Id           : int  2818 2818 2818 2818 2818 2818 2818 2818 2818 2818 ...
+##  $ Host_Name          : Factor w/ 508 levels "Aafje","Adriana",..: 136 136 136 136 136 136 136 136 136 136 ...
+##  $ User_Id            : int  2914515 5711109 2944771 4620679 373226 2200958 1348274 5433076 2847616 857406 ...
+##  $ User_Name          : Factor w/ 2932 levels "(Email hidden by Airbnb)",..: 1205 1153 2875 1130 2021 2308 413 2823 569 1964 ...
+##  $ Hotel_name         : Factor w/ 507 levels "'Westerpark Sanctuary', Office-Apartment",..: 383 383 383 383 383 383 383 383 383 383 ...
+##  $ summary            : Factor w/ 382 levels "","'LORE'S PLACE' A lovely, open writers home in the fun 'Indische Buurt' in Amsterdam! We are offering a open pla"| __truncated__,..: 242 242 242 242 242 242 242 242 242 242 ...
+##  $ space              : Factor w/ 504 levels "","- 100 m2 floor space - private garden of 45 m2  - living room with a '30s bar, 55 inch QLED TV and home cinema "| __truncated__,..: 158 158 158 158 158 158 158 158 158 158 ...
+##  $ description        : Factor w/ 506 levels "'LORE'S PLACE' A lovely, open writers home in the fun 'Indische Buurt' in Amsterdam! We are offering a open pla"| __truncated__,..: 317 317 317 317 317 317 317 317 317 317 ...
+##  $ host_id            : int  4070804 4070804 4070804 4070804 4070804 4070804 4070804 4070804 4070804 4070804 ...
+##  $ host_name          : Factor w/ 404 levels "Aafje","Adriana",..: 81 81 81 81 81 81 81 81 81 81 ...
+##  $ property_type      : Factor w/ 15 levels "Apartment","Bed and breakfast",..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ room_type          : Factor w/ 3 levels "Entire home/apt",..: 2 2 2 2 2 2 2 2 2 2 ...
+##  $ accommodates       : Factor w/ 10 levels "Five Person",..: 10 10 10 10 10 10 10 10 10 10 ...
+##  $ bathrooms          : Factor w/ 11 levels "Four attach bathroom",..: 4 3 3 3 3 3 3 3 3 3 ...
+##  $ bedrooms           : Factor w/ 7 levels "Five bedroom",..: 3 3 3 3 3 3 3 3 3 3 ...
+##  $ beds               : Factor w/ 7 levels "Five bed","Four bed",..: 3 3 3 3 3 3 3 3 3 3 ...
+##  $ bed_type           : Factor w/ 4 levels "Couch","Futon",..: 4 4 4 4 4 4 4 4 4 4 ...
+##  $ amenities          : Factor w/ 508 levels "{\"Cable TV\",Internet,Wifi,\"Paid parking off premises\",\"Buzzer/wireless intercom\",Heating,\"Family/kid fri"| __truncated__,..: 16 16 16 16 16 16 16 16 16 16 ...
+##  $ cancellation_policy: Factor w/ 3 levels "flexible","moderate",..: 3 3 3 3 3 3 3 3 3 3 ...
+##  $ Ratings            : int  3 2 5 3 3 3 3 3 2 3 ...
+\end{verbatim}
+
+\hypertarget{removing-all-those-users-corresponding-to-missing-ratings-and}{%
+\subsubsection{Removing all those users corresponding to missing ratings
+and}\label{removing-all-those-users-corresponding-to-missing-ratings-and}}
+
+\hypertarget{extract-only-the-explicit-ratings-and-visualize-the-histogram-of-ratings}{%
+\subsubsection{Extract only the explicit ratings and visualize the
+histogram of
+Ratings}\label{extract-only-the-explicit-ratings-and-visualize-the-histogram-of-ratings}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{airbnbCF =}\StringTok{ }\NormalTok{airbnb[,}\KeywordTok{c}\NormalTok{(}\StringTok{"Hotel_Id"}\NormalTok{,}\StringTok{"User_Id"}\NormalTok{, }\StringTok{"Ratings"}\NormalTok{)]}
+\KeywordTok{sapply}\NormalTok{(airbnbCF, }\ControlFlowTok{function}\NormalTok{(x)\{}\KeywordTok{sum}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(x))\})}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Hotel_Id  User_Id  Ratings 
+##        0        0      967
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{airbnbCF}\OperatorTok{$}\NormalTok{Ratings[}\KeywordTok{is.na}\NormalTok{(airbnbCF}\OperatorTok{$}\NormalTok{Ratings)] =}\StringTok{ }\DecValTok{0}
+\NormalTok{airbnbCF =}\StringTok{ }\NormalTok{airbnbCF[airbnbCF}\OperatorTok{$}\NormalTok{Ratings }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{,]}
+\KeywordTok{sapply}\NormalTok{(airbnbCF, }\ControlFlowTok{function}\NormalTok{(x)\{}\KeywordTok{sum}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(x))\})}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Hotel_Id  User_Id  Ratings 
+##        0        0        0
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{hist}\NormalTok{(airbnbCF}\OperatorTok{$}\NormalTok{Ratings)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{ALS_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+\hypertarget{eliminate-users-with-too-few-ratings-and-consider-activer-users-who-had-rated-hotels-more-than-and-equal-to-10-hotels}{%
+\subsubsection{Eliminate users with too few ratings and Consider Activer
+users who had rated hotels more than and equal to 10
+hotels}\label{eliminate-users-with-too-few-ratings-and-consider-activer-users-who-had-rated-hotels-more-than-and-equal-to-10-hotels}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cnts =}\StringTok{ }\KeywordTok{aggregate}\NormalTok{(Hotel_Id }\OperatorTok{~}\StringTok{ }\NormalTok{User_Id, }\DataTypeTok{data =}\NormalTok{ airbnbCF, }\DataTypeTok{FUN =}\NormalTok{ length)}
+\KeywordTok{colnames}\NormalTok{(cnts) =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"user"}\NormalTok{,}\StringTok{"numitems"}\NormalTok{)}
+\NormalTok{activeusers =}\StringTok{ }\NormalTok{cnts}\OperatorTok{$}\NormalTok{user[cnts}\OperatorTok{$}\NormalTok{numitems }\OperatorTok{>=}\StringTok{ }\DecValTok{10}\NormalTok{] ; }\KeywordTok{length}\NormalTok{(activeusers)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 422
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{evCF =}\StringTok{ }\NormalTok{airbnbCF[airbnbCF}\OperatorTok{$}\NormalTok{User_Id }\OperatorTok{%in%}\StringTok{ }\NormalTok{activeusers,]}
+\KeywordTok{dim}\NormalTok{(evCF)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 4672    3
+\end{verbatim}
+
+\hypertarget{eliminate-hotels-with-too-few-ratings-and-consider-active-hotels-who-had-been-rated-more-than-and-equal-to-10-users}{%
+\subsubsection{Eliminate Hotels with too few ratings and Consider Active
+Hotels who had been rated more than and equal to 10
+users}\label{eliminate-hotels-with-too-few-ratings-and-consider-active-hotels-who-had-been-rated-more-than-and-equal-to-10-users}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cnts =}\StringTok{ }\KeywordTok{aggregate}\NormalTok{(User_Id }\OperatorTok{~}\StringTok{ }\NormalTok{Hotel_Id, }\DataTypeTok{data =}\NormalTok{ airbnbCF, }\DataTypeTok{FUN=}\NormalTok{length)}
+\KeywordTok{colnames}\NormalTok{(cnts) =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"item"}\NormalTok{,}\StringTok{"numusers"}\NormalTok{)}
+\NormalTok{popularhotels =}\StringTok{ }\NormalTok{cnts}\OperatorTok{$}\NormalTok{item[cnts}\OperatorTok{$}\NormalTok{numusers }\OperatorTok{>=}\StringTok{ }\DecValTok{10}\NormalTok{] ; }\KeywordTok{length}\NormalTok{(popularhotels)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 508
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ev =}\StringTok{ }\NormalTok{evCF[evCF}\OperatorTok{$}\NormalTok{Hotel_Id }\OperatorTok{%in%}\StringTok{ }\NormalTok{popularhotels,]}
+\KeywordTok{dim}\NormalTok{(ev)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 4672    3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{str}\NormalTok{(ev)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 'data.frame':    4672 obs. of  3 variables:
+##  $ Hotel_Id: int  2818 2818 2818 2818 2818 2818 2818 20168 20168 20168 ...
+##  $ User_Id : int  2944771 2847616 2807294 4489932 5461945 4380449 4644013 913549 5039682 4017740 ...
+##  $ Ratings : num  5 2 4 3 3 2 5 2 4 2 ...
+\end{verbatim}
+
+\hypertarget{remove-duplicate-records-from-the-datasets}{%
+\subsubsection{Remove duplicate records from the
+datasets}\label{remove-duplicate-records-from-the-datasets}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ev_Final =}\StringTok{ }\NormalTok{ev }\OperatorTok{%>%}\StringTok{ }\KeywordTok{distinct}\NormalTok{(User_Id,Hotel_Id,}\DataTypeTok{.keep_all =} \OtherTok{TRUE}\NormalTok{)}
+\KeywordTok{dim}\NormalTok{(ev_Final)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 4621    3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{str}\NormalTok{(ev_Final)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 'data.frame':    4621 obs. of  3 variables:
+##  $ Hotel_Id: int  2818 2818 2818 2818 2818 2818 2818 20168 20168 20168 ...
+##  $ User_Id : int  2944771 2847616 2807294 4489932 5461945 4380449 4644013 913549 5039682 4017740 ...
+##  $ Ratings : num  5 2 4 3 3 2 5 2 4 2 ...
+\end{verbatim}
+
+\hypertarget{using-the-softimpute-library}{%
+\section{(2) using the softImpute
+library}\label{using-the-softimpute-library}}
+
+\hypertarget{reread-the-data-ensuring-users-and-items-are-read-as-factors}{%
+\subsubsection{reread the data ensuring users and items are read as
+factors}\label{reread-the-data-ensuring-users-and-items-are-read-as-factors}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{events =}\StringTok{ }\NormalTok{ev_Final[,}\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{3}\NormalTok{)]}
+\NormalTok{ctypes =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"factor"}\NormalTok{,}\StringTok{"factor"}\NormalTok{,}\StringTok{"numeric"}\NormalTok{)}
+\KeywordTok{colnames}\NormalTok{(events) =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"user"}\NormalTok{,}\StringTok{"item"}\NormalTok{,}\StringTok{"rating"}\NormalTok{)}
+\NormalTok{events}\OperatorTok{$}\NormalTok{user=}\StringTok{ }\KeywordTok{factor}\NormalTok{(events}\OperatorTok{$}\NormalTok{user)}
+\NormalTok{events}\OperatorTok{$}\NormalTok{item=}\StringTok{ }\KeywordTok{factor}\NormalTok{(events}\OperatorTok{$}\NormalTok{item)}
+\KeywordTok{str}\NormalTok{(events)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 'data.frame':    4621 obs. of  3 variables:
+##  $ user  : Factor w/ 422 levels "57920","142145",..: 194 183 177 327 400 316 341 44 372 281 ...
+##  $ item  : Factor w/ 508 levels "2818","20168",..: 1 1 1 1 1 1 1 2 2 2 ...
+##  $ rating: num  5 2 4 3 3 2 5 2 4 2 ...
+\end{verbatim}
+
+\hypertarget{create-a-wide-format-of-dataset}{%
+\subsubsection{Create a wide format of
+dataset}\label{create-a-wide-format-of-dataset}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{users =}\StringTok{ }\KeywordTok{acast}\NormalTok{(events, user }\OperatorTok{~}\StringTok{ }\NormalTok{item, }\DataTypeTok{value.var =} \StringTok{"rating"}\NormalTok{)}
+\CommentTok{#colnames(users) = sort(unique(events$item))}
+\CommentTok{#rownames(users) = sort(unique(events$user))}
+\NormalTok{users[}\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{,}\DecValTok{1}\OperatorTok{:}\DecValTok{15}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##        2818 20168 25428 27886 28871 29051 31080 38266 42970 43109 43980
+## 57920    NA    NA    NA    NA    NA    NA    NA    NA    NA    NA    NA
+## 142145   NA    NA    NA    NA    NA    NA    NA    NA    NA    NA    NA
+## 186729   NA    NA    NA    NA    NA    NA    NA    NA    NA    NA    NA
+## 187580   NA    NA     2    NA    NA    NA    NA    NA    NA    NA    NA
+## 195580   NA    NA    NA    NA    NA    NA    NA    NA    NA    NA    NA
+## 195859   NA    NA    NA    NA    NA    NA    NA     4    NA    NA    NA
+## 201541   NA    NA    NA    NA    NA    NA    NA    NA    NA    NA    NA
+## 216385   NA    NA    NA    NA    NA    NA    NA    NA    NA    NA    NA
+## 241336   NA    NA    NA    NA    NA    NA    NA    NA    NA    NA    NA
+## 262799   NA    NA    NA    NA    NA    NA    NA    NA    NA    NA    NA
+##        44129 44391 46386 47061
+## 57920     NA    NA    NA    NA
+## 142145    NA    NA    NA    NA
+## 186729    NA    NA    NA    NA
+## 187580     1    NA    NA     3
+## 195580    NA    NA    NA    NA
+## 195859    NA    NA    NA    NA
+## 201541    NA    NA    NA    NA
+## 216385    NA     3    NA    NA
+## 241336    NA    NA    NA    NA
+## 262799    NA    NA    NA    NA
+\end{verbatim}
+
+\hypertarget{split-the-events-using-the-same-split-train_ind-test_ind-as-used-earlier}{%
+\subsubsection{split the events using the same split (train\_ind \&
+test\_ind) as used
+earlier}\label{split-the-events-using-the-same-split-train_ind-test_ind-as-used-earlier}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+\NormalTok{smp_size <-}\StringTok{ }\KeywordTok{floor}\NormalTok{(}\FloatTok{0.8} \OperatorTok{*}\StringTok{ }\KeywordTok{nrow}\NormalTok{(events))}
+\NormalTok{train_indexes <-}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\StringTok{ }\KeywordTok{nrow}\NormalTok{(events), }\DataTypeTok{size =}\NormalTok{ smp_size)}
+\NormalTok{trainevents <-}\StringTok{ }\NormalTok{events[train_indexes, ]; }\KeywordTok{dim}\NormalTok{(trainevents)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 3696    3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{testevents  <-}\StringTok{ }\NormalTok{events[}\OperatorTok{-}\NormalTok{train_indexes, ]; }\KeywordTok{dim}\NormalTok{(testevents)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 925   3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{write.csv}\NormalTok{(trainevents, }\StringTok{"trainevents.csv"}\NormalTok{)}
+\KeywordTok{write.csv}\NormalTok{(testevents, }\StringTok{"testevents.csv"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{make-a-copy-and-then-blank-out-the-test-events-ie-set-test-ratings-for-the-test-useritem-pairs-to-na}{%
+\subsubsection{make a copy and then blank out the test events (ie set
+test ratings for the test (user,item) pairs to
+NA)}\label{make-a-copy-and-then-blank-out-the-test-events-ie-set-test-ratings-for-the-test-useritem-pairs-to-na}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{trainusers =}\StringTok{ }\NormalTok{users}
+\KeywordTok{cat}\NormalTok{(}\StringTok{"Fill rate whole wide matrix : "}\NormalTok{); }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Fill rate whole wide matrix :
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{fillrate}\NormalTok{(trainusers)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 2.155558 %
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{cat}\NormalTok{(}\StringTok{"}\CharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{cat}\NormalTok{(}\StringTok{"Fill rate Testset matrix : "}\NormalTok{); }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Fill rate Testset matrix :
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x =}\StringTok{ }\KeywordTok{apply}\NormalTok{(testevents,}\DecValTok{1}\NormalTok{,}\ControlFlowTok{function}\NormalTok{(row) trainusers[row[}\DecValTok{1}\NormalTok{],row[}\DecValTok{2}\NormalTok{]] <<-}\StringTok{ }\OtherTok{NA}\NormalTok{) }\CommentTok{# row[1] ~ user, row[2] ~ item}
+\KeywordTok{fillrate}\NormalTok{(trainusers)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 1.724074 %
+\end{verbatim}
+
+\hypertarget{factorize-into-u-d-v-using-30-latent-features}{%
+\subsubsection{factorize into U * D * V using 30 latent
+features}\label{factorize-into-u-d-v-using-30-latent-features}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{trainusers=}\KeywordTok{as}\NormalTok{(trainusers,}\StringTok{"Incomplete"}\NormalTok{) }\CommentTok{# coerce into correct matrix format with missing entries}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{do-one-of-the-below}{%
+\subsubsection{do one of the below}\label{do-one-of-the-below}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fit1=}\KeywordTok{softImpute}\NormalTok{(trainusers, }\DataTypeTok{rank.max=}\DecValTok{30}\NormalTok{, }\DataTypeTok{type=}\StringTok{"als"}\NormalTok{) }\CommentTok{# als is the default}
+\NormalTok{fit2=}\KeywordTok{softImpute}\NormalTok{(trainusers, }\DataTypeTok{rank.max=}\DecValTok{30}\NormalTok{, }\DataTypeTok{type=}\StringTok{"svd"}\NormalTok{) }\CommentTok{# for comparison}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{take-a-look-at-the-factorised-matrixes}{%
+\subsubsection{take a look at the factorised
+matrixes}\label{take-a-look-at-the-factorised-matrixes}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{dim}\NormalTok{(fit1}\OperatorTok{$}\NormalTok{u) ; fit1}\OperatorTok{$}\NormalTok{u[}\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{,}\DecValTok{1}\OperatorTok{:}\DecValTok{5}\NormalTok{] }\CommentTok{# the user latent features}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 422  30
+\end{verbatim}
+
+\begin{verbatim}
+##                [,1]         [,2]         [,3]         [,4]        [,5]
+##  [1,] -0.0102665120 -0.039022002 -0.039916900  0.017307879 -0.05132815
+##  [2,] -0.0485639745 -0.014048117  0.091880517 -0.003925695  0.03365736
+##  [3,] -0.0435257243  0.008191458 -0.046380231  0.030249175 -0.03265346
+##  [4,] -0.0441161024  0.046941331 -0.044996848 -0.054321034  0.07684595
+##  [5,]  0.0004133337  0.002748377  0.009720409 -0.039670830 -0.09524968
+##  [6,]  0.0269234434 -0.039275965  0.011325124 -0.071261375  0.09622555
+##  [7,] -0.0547167417 -0.003534646  0.113800828  0.055150135  0.02090859
+##  [8,] -0.0324761649 -0.018744270 -0.022901537  0.038781958 -0.07593921
+##  [9,] -0.0382489783 -0.012074396 -0.042280848  0.036422480  0.06002570
+## [10,] -0.0881630665 -0.084178802 -0.046947466  0.002412226 -0.02267661
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{dim}\NormalTok{(fit1}\OperatorTok{$}\NormalTok{v) ; fit1}\OperatorTok{$}\NormalTok{v[}\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{,}\DecValTok{1}\OperatorTok{:}\DecValTok{5}\NormalTok{] }\CommentTok{# the item latent features}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 508  30
+\end{verbatim}
+
+\begin{verbatim}
+##               [,1]        [,2]         [,3]         [,4]        [,5]
+##  [1,] -0.064264593 -0.08652862 -0.029733556 -0.018568499 -0.04809533
+##  [2,] -0.006459371  0.02884584  0.007924384  0.001926542 -0.06942288
+##  [3,] -0.051640991 -0.01899587 -0.027683398 -0.018424423  0.01479871
+##  [4,] -0.059439289 -0.04315917 -0.002858857  0.044273551 -0.04693955
+##  [5,] -0.051473735  0.06148844 -0.037114580 -0.023259303  0.04861710
+##  [6,] -0.015081718  0.01600833  0.022450516  0.006833347  0.03346169
+##  [7,] -0.060154176 -0.05729578  0.054448279 -0.006753314  0.01315366
+##  [8,] -0.004018383  0.02697307  0.105513347  0.022276481  0.02623606
+##  [9,] -0.037741161 -0.04860415 -0.058899188  0.022065958 -0.04939723
+## [10,] -0.033744133  0.01806630  0.018701708 -0.019520701  0.05652530
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{length}\NormalTok{(fit1}\OperatorTok{$}\NormalTok{d); }\KeywordTok{head}\NormalTok{(fit1}\OperatorTok{$}\NormalTok{d)   }\CommentTok{# the singular values}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 30
+\end{verbatim}
+
+\begin{verbatim}
+## [1] 136.5130 107.4458 104.6133 102.5861 101.7587 101.2385
+\end{verbatim}
+
+\hypertarget{make-predictions-for-all-of-the-empty-useritem-pairs-the-test-pairs-those-missing-in-orginal-dataset}{%
+\subsubsection{make predictions for all of the empty (user,item) pairs
+(the test pairs + those missing in orginal
+dataset)}\label{make-predictions-for-all-of-the-empty-useritem-pairs-the-test-pairs-those-missing-in-orginal-dataset}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{trainuserscompleted1 =}\StringTok{ }\KeywordTok{complete}\NormalTok{(trainusers, fit1)}
+\NormalTok{trainuserscompleted2 =}\StringTok{ }\KeywordTok{complete}\NormalTok{(trainusers, fit2)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{compute-the-mae-for-the-predictions-made-for-the-test-events-fir-model-1---fit1-using-als}{%
+\subsubsection{compute the MAE for the predictions made for the test
+events fir model 1 - fit1 (Using
+ALS)}\label{compute-the-mae-for-the-predictions-made-for-the-test-events-fir-model-1---fit1-using-als}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{rownames}\NormalTok{(trainuserscompleted1) =}\StringTok{ }\KeywordTok{rownames}\NormalTok{(users) }\CommentTok{# copy across the user names}
+\KeywordTok{colnames}\NormalTok{(trainuserscompleted1) =}\StringTok{ }\KeywordTok{colnames}\NormalTok{(users) }\CommentTok{# copy across the item names}
+\CommentTok{# Output recommendation using ALS.}
+\NormalTok{trainuserscompleted1[}\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{,}\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##               2818      20168       25428      27886      28871
+## 57920   1.49656560 -0.1432019 -0.24430582  1.0739055 -0.5314558
+## 142145 -0.44328097 -0.7048120  1.06300311  1.5819880  0.3333384
+## 186729  0.09959493 -0.1377113  0.89264230  1.4541477  1.7345458
+## 187580 -0.04135468 -0.4857795  2.00000000 -3.1014433  0.4174980
+## 195580  0.48677202  0.4724423  1.22155216 -1.0072422 -2.2254499
+## 195859  0.22559863 -0.3402947 -0.53471554 -1.9558357  0.6289133
+## 201541  0.52344801 -0.9103698  0.06991817  0.7483926  1.0288884
+## 216385  1.08106566  1.1276565 -0.16031961  0.3074504 -0.6153120
+## 241336 -0.97940174 -0.6633407  0.04455350 -0.3976856  1.7096291
+## 262799  0.02042747 -0.4486453  2.25595400  1.1410179 -0.5987040
+##              29051       31080      38266       42970      43109
+## 57920  -0.24856111 -0.35155931 -1.1371221  0.96959425  0.3705530
+## 142145  2.15969410  0.72742235  1.1970255 -1.33872357  0.7322183
+## 186729  0.29045616  1.04272823  1.0054205  0.30050192  0.7711399
+## 187580 -0.61475475 -0.43023071 -0.0946785 -1.84449828 -0.3311865
+## 195580 -0.68246239 -1.14384327 -1.1408844 -1.62165847 -1.6309054
+## 195859 -0.30923819  0.64381606  0.3746261  0.03597052  0.2982090
+## 201541  1.89601894  1.48553943  2.1973977 -0.06174800  1.9030811
+## 216385  0.53315554  0.05180157 -0.5238580  1.91018788 -1.0936715
+## 241336 -0.36994894  0.46422255 -0.7485257  1.20720836  1.2185064
+## 262799 -0.06865498  0.55479734 -0.5918073 -0.61246149 -0.1697243
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{dim}\NormalTok{(trainuserscompleted1) }\CommentTok{# 422 508}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 422 508
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{outcome =}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(trainuserscompleted1)}
+\CommentTok{#outcome = outcome[,-1]}
+
+\NormalTok{Top1_Hotel =}\StringTok{ }\KeywordTok{integer}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(outcome))}
+\NormalTok{Top2_Hotel =}\StringTok{ }\KeywordTok{integer}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(outcome))}
+\NormalTok{Top3_Hotel =}\StringTok{ }\KeywordTok{integer}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(outcome))}
+\NormalTok{Top4_Hotel =}\StringTok{ }\KeywordTok{integer}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(outcome))}
+\NormalTok{Top5_Hotel =}\StringTok{ }\KeywordTok{integer}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(outcome))}
+
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(outcome)) \{}
+\NormalTok{  a =}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(outcome[i,])[}\DecValTok{1}\NormalTok{,]}
+\NormalTok{  Top1_Hotel[i] =}\StringTok{ }\KeywordTok{names}\NormalTok{(a[}\KeywordTok{order}\NormalTok{(a,}\DataTypeTok{decreasing=}\OtherTok{TRUE}\NormalTok{)[}\DecValTok{1}\NormalTok{]])}
+\NormalTok{  Top2_Hotel[i] =}\StringTok{ }\KeywordTok{names}\NormalTok{(a[}\KeywordTok{order}\NormalTok{(a,}\DataTypeTok{decreasing=}\OtherTok{TRUE}\NormalTok{)[}\DecValTok{2}\NormalTok{]])}
+\NormalTok{  Top3_Hotel[i] =}\StringTok{ }\KeywordTok{names}\NormalTok{(a[}\KeywordTok{order}\NormalTok{(a,}\DataTypeTok{decreasing=}\OtherTok{TRUE}\NormalTok{)[}\DecValTok{3}\NormalTok{]])}
+\NormalTok{  Top4_Hotel[i] =}\StringTok{ }\KeywordTok{names}\NormalTok{(a[}\KeywordTok{order}\NormalTok{(a,}\DataTypeTok{decreasing=}\OtherTok{TRUE}\NormalTok{)[}\DecValTok{4}\NormalTok{]])}
+\NormalTok{  Top5_Hotel[i] =}\StringTok{ }\KeywordTok{names}\NormalTok{(a[}\KeywordTok{order}\NormalTok{(a,}\DataTypeTok{decreasing=}\OtherTok{TRUE}\NormalTok{)[}\DecValTok{5}\NormalTok{]])}
+\NormalTok{\}}
+
+\NormalTok{df1 <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(Top1_Hotel, Top2_Hotel, Top3_Hotel, Top4_Hotel, Top5_Hotel, }\DataTypeTok{stringsAsFactors =} \OtherTok{TRUE}\NormalTok{)}
+\KeywordTok{rownames}\NormalTok{(df1) =}\StringTok{ }\KeywordTok{rownames}\NormalTok{(users)}
+\KeywordTok{write.csv}\NormalTok{(df1, }\DataTypeTok{file =} \StringTok{"Recommended Hotel For each user using ALS.csv"}\NormalTok{)}
+\NormalTok{abserrs =}\StringTok{ }\KeywordTok{apply}\NormalTok{(testevents, }\DecValTok{1}\NormalTok{, }\ControlFlowTok{function}\NormalTok{(row) }\KeywordTok{abs}\NormalTok{(trainuserscompleted1[row[}\DecValTok{1}\NormalTok{],row[}\DecValTok{2}\NormalTok{]] }\OperatorTok{-}\StringTok{ }\NormalTok{users[row[}\DecValTok{1}\NormalTok{],row[}\DecValTok{2}\NormalTok{]])) }\CommentTok{# row[1] ~ user, row[2] ~ item}
+\KeywordTok{mean}\NormalTok{(}\KeywordTok{t}\NormalTok{(abserrs), }\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{) }\CommentTok{# show the MAE}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 2.662412
+\end{verbatim}
+
+\hypertarget{compute-the-mae-for-the-predictions-made-for-the-test-events-fir-model-2---fit2-using-svd}{%
+\subsubsection{compute the MAE for the predictions made for the test
+events fir model 2 - fit2 (Using
+SVD)}\label{compute-the-mae-for-the-predictions-made-for-the-test-events-fir-model-2---fit2-using-svd}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{rownames}\NormalTok{(trainuserscompleted2) =}\StringTok{ }\KeywordTok{rownames}\NormalTok{(users) }\CommentTok{# copy across the user names}
+\KeywordTok{colnames}\NormalTok{(trainuserscompleted2) =}\StringTok{ }\KeywordTok{colnames}\NormalTok{(users) }\CommentTok{# copy across the item names}
+\CommentTok{# Output recommendation using ALS.}
+\NormalTok{trainuserscompleted2[}\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{,}\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##              2818       20168       25428       27886      28871
+## 57920   1.6229976 -0.73719264 -0.66822467 -0.09787137  0.7993859
+## 142145  0.4762894  0.08311856 -0.06130967 -0.51905792  0.6893669
+## 186729  0.2714230  0.03178666  0.01392250  0.46083892  1.3745222
+## 187580  0.3586904  0.97810811  2.00000000 -0.50077113  0.1635062
+## 195580 -0.3508718 -0.05309896  0.07706351  0.23999472 -0.6767932
+## 195859 -0.3379241 -0.16059954 -0.06382876 -1.22144524 -0.4601641
+## 201541  2.1777938  0.04281306  0.69269621 -0.97911890  0.8348631
+## 216385  0.1349993  1.41917835 -0.24047881  0.73530561 -0.5436771
+## 241336 -1.7513406 -0.82290619 -0.72880671 -0.02108603  1.6754001
+## 262799  0.3443658  0.04423292  0.24964975  0.87842163 -0.1676665
+##             29051       31080         38266       42970      43109
+## 57920   1.1800501  0.17313151  0.0007116486  1.24990267 -0.2466749
+## 142145  0.9842375  0.82525185  0.2276855547  0.01258011 -0.4363097
+## 186729 -0.3376164  0.83137245 -0.1335478067  2.14062517  0.3925549
+## 187580  0.2514803 -0.26988401  0.2947752897  1.05435622  0.8702850
+## 195580  0.7191313 -0.30691169 -0.0669920311 -0.70409017  0.6630953
+## 195859  0.9759271 -0.07602706 -0.2401142291 -0.86556146 -0.5946764
+## 201541 -0.7614856  1.28705867  0.0515483596  1.17352870 -0.9709091
+## 216385 -0.1632830  0.98337638  1.5727420204  0.59676554  0.3410050
+## 241336 -0.5135105  0.59255318 -0.6502973895 -0.62030195  0.6515390
+## 262799  0.8335425  0.34661632 -0.0171279312  1.32068453  0.1541693
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{dim}\NormalTok{(trainuserscompleted2) }\CommentTok{# 422 508}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 422 508
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{outcome =}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(trainuserscompleted2)}
+\CommentTok{#outcome = outcome[,-1]}
+
+\NormalTok{Top1_Hotel =}\StringTok{ }\KeywordTok{integer}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(outcome))}
+\NormalTok{Top2_Hotel =}\StringTok{ }\KeywordTok{integer}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(outcome))}
+\NormalTok{Top3_Hotel =}\StringTok{ }\KeywordTok{integer}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(outcome))}
+\NormalTok{Top4_Hotel =}\StringTok{ }\KeywordTok{integer}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(outcome))}
+\NormalTok{Top5_Hotel =}\StringTok{ }\KeywordTok{integer}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(outcome))}
+
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(outcome)) \{}
+\NormalTok{  a =}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(outcome[i,])[}\DecValTok{1}\NormalTok{,]}
+\NormalTok{  Top1_Hotel[i] =}\StringTok{ }\KeywordTok{names}\NormalTok{(a[}\KeywordTok{order}\NormalTok{(a,}\DataTypeTok{decreasing=}\OtherTok{TRUE}\NormalTok{)[}\DecValTok{1}\NormalTok{]])}
+\NormalTok{  Top2_Hotel[i] =}\StringTok{ }\KeywordTok{names}\NormalTok{(a[}\KeywordTok{order}\NormalTok{(a,}\DataTypeTok{decreasing=}\OtherTok{TRUE}\NormalTok{)[}\DecValTok{2}\NormalTok{]])}
+\NormalTok{  Top3_Hotel[i] =}\StringTok{ }\KeywordTok{names}\NormalTok{(a[}\KeywordTok{order}\NormalTok{(a,}\DataTypeTok{decreasing=}\OtherTok{TRUE}\NormalTok{)[}\DecValTok{3}\NormalTok{]])}
+\NormalTok{  Top4_Hotel[i] =}\StringTok{ }\KeywordTok{names}\NormalTok{(a[}\KeywordTok{order}\NormalTok{(a,}\DataTypeTok{decreasing=}\OtherTok{TRUE}\NormalTok{)[}\DecValTok{4}\NormalTok{]])}
+\NormalTok{  Top5_Hotel[i] =}\StringTok{ }\KeywordTok{names}\NormalTok{(a[}\KeywordTok{order}\NormalTok{(a,}\DataTypeTok{decreasing=}\OtherTok{TRUE}\NormalTok{)[}\DecValTok{5}\NormalTok{]])}
+\NormalTok{\}}
+
+\NormalTok{df2 <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(Top1_Hotel, Top2_Hotel, Top3_Hotel, Top4_Hotel, Top5_Hotel, }\DataTypeTok{stringsAsFactors =} \OtherTok{TRUE}\NormalTok{)}
+\KeywordTok{rownames}\NormalTok{(df2) =}\StringTok{ }\KeywordTok{rownames}\NormalTok{(users)}
+\KeywordTok{write.csv}\NormalTok{(df2, }\DataTypeTok{file =} \StringTok{"Recommended Hotel For each user using SVD.csv"}\NormalTok{)}
+\NormalTok{abserrs =}\StringTok{ }\KeywordTok{apply}\NormalTok{(testevents, }\DecValTok{1}\NormalTok{, }\ControlFlowTok{function}\NormalTok{(row) }\KeywordTok{abs}\NormalTok{(trainuserscompleted2[row[}\DecValTok{1}\NormalTok{],row[}\DecValTok{2}\NormalTok{]] }\OperatorTok{-}\StringTok{ }\NormalTok{users[row[}\DecValTok{1}\NormalTok{],row[}\DecValTok{2}\NormalTok{]])) }\CommentTok{# row[1] ~ user, row[2] ~ item}
+\KeywordTok{mean}\NormalTok{(}\KeywordTok{t}\NormalTok{(abserrs), }\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{) }\CommentTok{# show the MAE}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 2.57295
+\end{verbatim}
+
+\hypertarget{for-comparison-we-can-make-the-predictions-for-the-test-set-events-manually-from-the-fractorised-matrices}{%
+\section{for comparison we can make the predictions for the test set
+events manually from the fractorised
+matrices}\label{for-comparison-we-can-make-the-predictions-for-the-test-set-events-manually-from-the-fractorised-matrices}}
+
+\hypertarget{add-user-and-item-names-to-u-and-v-so-we-can-index-them-by-user-name-and-item-name-for-als}{%
+\subsubsection{add user and item names to U and V so we can index them
+by user name and item name for
+ALS}\label{add-user-and-item-names-to-u-and-v-so-we-can-index-them-by-user-name-and-item-name-for-als}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{rownames}\NormalTok{(fit1}\OperatorTok{$}\NormalTok{u) =}\StringTok{ }\KeywordTok{sort}\NormalTok{(}\KeywordTok{unique}\NormalTok{(events}\OperatorTok{$}\NormalTok{user))}
+\KeywordTok{rownames}\NormalTok{(fit1}\OperatorTok{$}\NormalTok{v) =}\StringTok{ }\KeywordTok{sort}\NormalTok{(}\KeywordTok{unique}\NormalTok{(events}\OperatorTok{$}\NormalTok{item))}
+\NormalTok{fit1}\OperatorTok{$}\NormalTok{u[}\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{,}\DecValTok{1}\OperatorTok{:}\DecValTok{5}\NormalTok{]; fit1}\OperatorTok{$}\NormalTok{v[}\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{,}\DecValTok{1}\OperatorTok{:}\DecValTok{5}\NormalTok{] }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                 [,1]         [,2]         [,3]         [,4]        [,5]
+## 57920  -0.0102665120 -0.039022002 -0.039916900  0.017307879 -0.05132815
+## 142145 -0.0485639745 -0.014048117  0.091880517 -0.003925695  0.03365736
+## 186729 -0.0435257243  0.008191458 -0.046380231  0.030249175 -0.03265346
+## 187580 -0.0441161024  0.046941331 -0.044996848 -0.054321034  0.07684595
+## 195580  0.0004133337  0.002748377  0.009720409 -0.039670830 -0.09524968
+## 195859  0.0269234434 -0.039275965  0.011325124 -0.071261375  0.09622555
+## 201541 -0.0547167417 -0.003534646  0.113800828  0.055150135  0.02090859
+## 216385 -0.0324761649 -0.018744270 -0.022901537  0.038781958 -0.07593921
+## 241336 -0.0382489783 -0.012074396 -0.042280848  0.036422480  0.06002570
+## 262799 -0.0881630665 -0.084178802 -0.046947466  0.002412226 -0.02267661
+\end{verbatim}
+
+\begin{verbatim}
+##               [,1]        [,2]         [,3]         [,4]        [,5]
+## 2818  -0.064264593 -0.08652862 -0.029733556 -0.018568499 -0.04809533
+## 20168 -0.006459371  0.02884584  0.007924384  0.001926542 -0.06942288
+## 25428 -0.051640991 -0.01899587 -0.027683398 -0.018424423  0.01479871
+## 27886 -0.059439289 -0.04315917 -0.002858857  0.044273551 -0.04693955
+## 28871 -0.051473735  0.06148844 -0.037114580 -0.023259303  0.04861710
+## 29051 -0.015081718  0.01600833  0.022450516  0.006833347  0.03346169
+## 31080 -0.060154176 -0.05729578  0.054448279 -0.006753314  0.01315366
+## 38266 -0.004018383  0.02697307  0.105513347  0.022276481  0.02623606
+## 42970 -0.037741161 -0.04860415 -0.058899188  0.022065958 -0.04939723
+## 43109 -0.033744133  0.01806630  0.018701708 -0.019520701  0.05652530
+\end{verbatim}
+
+\hypertarget{add-user-and-item-names-to-u-and-v-so-we-can-index-them-by-user-name-and-item-name-for-svd}{%
+\subsubsection{add user and item names to U and V so we can index them
+by user name and item name for
+SVD}\label{add-user-and-item-names-to-u-and-v-so-we-can-index-them-by-user-name-and-item-name-for-svd}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{rownames}\NormalTok{(fit2}\OperatorTok{$}\NormalTok{u) =}\StringTok{ }\KeywordTok{sort}\NormalTok{(}\KeywordTok{unique}\NormalTok{(events}\OperatorTok{$}\NormalTok{user))}
+\KeywordTok{rownames}\NormalTok{(fit2}\OperatorTok{$}\NormalTok{v) =}\StringTok{ }\KeywordTok{sort}\NormalTok{(}\KeywordTok{unique}\NormalTok{(events}\OperatorTok{$}\NormalTok{item))}
+\NormalTok{fit2}\OperatorTok{$}\NormalTok{u[}\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{,}\DecValTok{1}\OperatorTok{:}\DecValTok{5}\NormalTok{]; fit2}\OperatorTok{$}\NormalTok{v[}\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{,}\DecValTok{1}\OperatorTok{:}\DecValTok{5}\NormalTok{] }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##               [,1]         [,2]         [,3]         [,4]        [,5]
+## 57920  -0.03675581  0.003098126 -0.076972886  0.023992969 -0.01148598
+## 142145 -0.04204361 -0.018484234 -0.009909967  0.048101908  0.02025055
+## 186729 -0.03576007  0.049186948  0.040928790  0.026538277  0.05153958
+## 187580 -0.03201761 -0.005949048 -0.021339361 -0.073479685  0.01486073
+## 195580 -0.04420493  0.040354793  0.046911348 -0.021913682 -0.03098403
+## 195859 -0.03363530  0.025762329 -0.055905538 -0.018142743  0.01708473
+## 201541 -0.03107184  0.042517255 -0.006959076  0.014680940  0.02933230
+## 216385 -0.04004934 -0.057458236 -0.050776943 -0.002810722  0.02717538
+## 241336 -0.05845218 -0.037322022  0.112420133  0.039589213  0.04954880
+## 262799 -0.05605130  0.012730095  0.007986937 -0.031732097 -0.03745082
+\end{verbatim}
+
+\begin{verbatim}
+##              [,1]         [,2]         [,3]         [,4]        [,5]
+## 2818  -0.04182050  0.001336952 -0.122066661 -0.022233943 -0.03634110
+## 20168 -0.02017147 -0.010469273 -0.009055421 -0.050733396 -0.01787569
+## 25428 -0.02302950  0.072861976 -0.020961462 -0.046093886  0.02364071
+## 27886 -0.04946250 -0.051574066  0.068246680 -0.020391422 -0.06901869
+## 28871 -0.05900196 -0.019960125  0.031245502  0.010523218  0.02967231
+## 29051 -0.04260082  0.052894460 -0.048273480 -0.070066585 -0.01390032
+## 31080 -0.04303905 -0.029322134  0.016852554 -0.017518054 -0.04281556
+## 38266 -0.04623462 -0.039631574 -0.025655100 -0.038893290  0.07614499
+## 42970 -0.04574691  0.047919074 -0.055075670 -0.126881787  0.05180360
+## 43109 -0.04651126  0.051359106  0.075709091  0.005820344 -0.07483597
+\end{verbatim}
+
+\hypertarget{compute-a-predicted-rating-for-each-useritem-in-testevents-forn-als}{%
+\subsubsection{compute a predicted rating for each (user,item) in
+testevents forn
+ALS}\label{compute-a-predicted-rating-for-each-useritem-in-testevents-forn-als}}
+
+\hypertarget{prediction-sum-userfeatures-from-u-matrix-singularvalues-d-matrix-itemfeatures-from-v-matrix}{%
+\subsubsection{prediction = sum( userfeatures (from u matrix) *
+singularvalues (d matrix) * itemfeatures (from v matrix)
+)}\label{prediction-sum-userfeatures-from-u-matrix-singularvalues-d-matrix-itemfeatures-from-v-matrix}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{prats1 =}\StringTok{ }\KeywordTok{apply}\NormalTok{(testevents,}\DecValTok{1}\NormalTok{,}\ControlFlowTok{function}\NormalTok{(row) }\KeywordTok{c}\NormalTok{(}\KeywordTok{sum}\NormalTok{(fit1}\OperatorTok{$}\NormalTok{u[row[}\DecValTok{1}\NormalTok{],] }\OperatorTok{*}\StringTok{ }\NormalTok{fit1}\OperatorTok{$}\NormalTok{d }\OperatorTok{*}\StringTok{ }\NormalTok{fit1}\OperatorTok{$}\NormalTok{v[row[}\DecValTok{2}\NormalTok{],]), row[}\DecValTok{3}\NormalTok{])) }\CommentTok{# row[1] ~ user, row[2] ~ item}
+\KeywordTok{head}\NormalTok{(}\KeywordTok{t}\NormalTok{(prats1))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                         rating
+## 6  "1.03839616364428"   "2"   
+## 8  "-0.111377317000089" "2"   
+## 16 "0.686165973101163"  "3"   
+## 23 "2.70828463316113"   "3"   
+## 24 "0.584123981844604"  "2"   
+## 28 "0.515211685354921"  "2"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{length}\NormalTok{(prats1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1850
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df =}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(prats1)}
+\KeywordTok{dim}\NormalTok{(df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1]   2 925
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df =}\StringTok{ }\KeywordTok{t}\NormalTok{(df)}
+\KeywordTok{str}\NormalTok{(testevents)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 'data.frame':    925 obs. of  3 variables:
+##  $ user  : Factor w/ 422 levels "57920","142145",..: 316 44 327 96 161 177 46 103 225 222 ...
+##  $ item  : Factor w/ 508 levels "2818","20168",..: 1 2 3 4 4 4 4 5 6 6 ...
+##  $ rating: num  2 2 3 3 2 2 5 3 3 3 ...
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{testevents}\OperatorTok{$}\NormalTok{prediction =}\StringTok{ }\NormalTok{df[,}\DecValTok{1}\NormalTok{]}
+\NormalTok{testevents}\OperatorTok{$}\NormalTok{MAE =}\StringTok{ }\KeywordTok{abs}\NormalTok{(testevents}\OperatorTok{$}\NormalTok{rating }\OperatorTok{-}\StringTok{ }\KeywordTok{as.numeric}\NormalTok{(testevents}\OperatorTok{$}\NormalTok{prediction))}
+\KeywordTok{sum}\NormalTok{(testevents}\OperatorTok{$}\NormalTok{MAE)}\OperatorTok{/}\DecValTok{925}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 2.662412
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{write.csv}\NormalTok{(testevents,}\StringTok{"testevents_ALS.csv"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{compute-a-predicted-rating-for-each-useritem-in-testevents-forn-svd}{%
+\subsubsection{compute a predicted rating for each (user,item) in
+testevents forn
+SVD}\label{compute-a-predicted-rating-for-each-useritem-in-testevents-forn-svd}}
+
+\hypertarget{prediction-sum-userfeatures-from-u-matrix-singularvalues-d-matrix-itemfeatures-from-v-matrix-1}{%
+\subsubsection{prediction = sum( userfeatures (from u matrix) *
+singularvalues (d matrix) * itemfeatures (from v matrix)
+)}\label{prediction-sum-userfeatures-from-u-matrix-singularvalues-d-matrix-itemfeatures-from-v-matrix-1}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{prats2 =}\StringTok{ }\KeywordTok{apply}\NormalTok{(testevents,}\DecValTok{1}\NormalTok{,}\ControlFlowTok{function}\NormalTok{(row) }\KeywordTok{c}\NormalTok{(}\KeywordTok{sum}\NormalTok{(fit2}\OperatorTok{$}\NormalTok{u[row[}\DecValTok{1}\NormalTok{],] }\OperatorTok{*}\StringTok{ }\NormalTok{fit2}\OperatorTok{$}\NormalTok{d }\OperatorTok{*}\StringTok{ }\NormalTok{fit2}\OperatorTok{$}\NormalTok{v[row[}\DecValTok{2}\NormalTok{],]), row[}\DecValTok{3}\NormalTok{])) }\CommentTok{# row[1] ~ user, row[2] ~ item}
+\KeywordTok{head}\NormalTok{(}\KeywordTok{t}\NormalTok{(prats2))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                         rating
+## 6  "1.08407994889929"   "2"   
+## 8  "0.130874412057766"  "2"   
+## 16 "0.346852303155659"  "3"   
+## 23 "-0.915493159623353" "3"   
+## 24 "0.264919949273675"  "2"   
+## 28 "0.516082881905233"  "2"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{length}\NormalTok{(prats2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1850
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df =}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(prats2)}
+\KeywordTok{dim}\NormalTok{(df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1]   2 925
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df =}\StringTok{ }\KeywordTok{t}\NormalTok{(df)}
+\KeywordTok{str}\NormalTok{(testevents)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 'data.frame':    925 obs. of  5 variables:
+##  $ user      : Factor w/ 422 levels "57920","142145",..: 316 44 327 96 161 177 46 103 225 222 ...
+##  $ item      : Factor w/ 508 levels "2818","20168",..: 1 2 3 4 4 4 4 5 6 6 ...
+##  $ rating    : num  2 2 3 3 2 2 5 3 3 3 ...
+##  $ prediction: chr  "1.03839616364428" "-0.111377317000089" "0.686165973101163" "2.70828463316113" ...
+##  $ MAE       : num  0.962 2.111 2.314 0.292 1.416 ...
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{testevents}\OperatorTok{$}\NormalTok{prediction =}\StringTok{ }\NormalTok{df[,}\DecValTok{1}\NormalTok{]}
+\NormalTok{testevents}\OperatorTok{$}\NormalTok{MAE =}\StringTok{ }\KeywordTok{abs}\NormalTok{(testevents}\OperatorTok{$}\NormalTok{rating }\OperatorTok{-}\StringTok{ }\KeywordTok{as.numeric}\NormalTok{(testevents}\OperatorTok{$}\NormalTok{prediction))}
+\KeywordTok{sum}\NormalTok{(testevents}\OperatorTok{$}\NormalTok{MAE)}\OperatorTok{/}\DecValTok{925}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 2.57295
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{write.csv}\NormalTok{(testevents,}\StringTok{"testevents_SVD.csv"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{average-mean-absolute-error-for-als-ans-svd-along-with-its-confusion-matrix}{%
+\subsubsection{Average Mean Absolute error for ALS ans SVD along with
+its confusion
+Matrix}\label{average-mean-absolute-error-for-als-ans-svd-along-with-its-confusion-matrix}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{cat}\NormalTok{(}\StringTok{"Average Mean Absolute error and Confusion Matrix Using ALS }\CharTok{\textbackslash{}n\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Average Mean Absolute error and Confusion Matrix Using ALS
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{preds =}\StringTok{ }\KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{unlist}\NormalTok{(prats1))}
+\KeywordTok{cat}\NormalTok{(}\StringTok{"avg MAE ="}\NormalTok{,}\KeywordTok{avgMAE}\NormalTok{(preds))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## avg MAE = 2.662412
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{cat}\NormalTok{(}\StringTok{"Confusion Matrix with Threshold Like as 3 }\CharTok{\textbackslash{}n}\StringTok{ }\CharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Confusion Matrix with Threshold Like as 3 
+## 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{showCM}\NormalTok{(preds, }\DataTypeTok{like=}\DecValTok{3}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## TN=  320 FP=    0
+## FN=  605 TP=    0  (total=925)
+## accuracy  = 34.6%
+## precision = NaN%
+## recall    = 0.0%
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{cat}\NormalTok{(}\StringTok{"Confusion Matrix with Threshold Like as 2 }\CharTok{\textbackslash{}n}\StringTok{ }\CharTok{\textbackslash{}n}\StringTok{ }\CharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Confusion Matrix with Threshold Like as 2 
+##  
+## 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{showCM}\NormalTok{(preds, }\DataTypeTok{like=}\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## TN=  125 FP=    3
+## FN=  769 TP=   28  (total=925)
+## accuracy  = 16.5%
+## precision = 90.3%
+## recall    = 3.5%
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{cat}\NormalTok{(}\StringTok{"}\CharTok{\textbackslash{}n}\StringTok{ }\CharTok{\textbackslash{}n}\StringTok{Average Mean Absolute error and Confusion Matrix Using SVD }\CharTok{\textbackslash{}n\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  
+## Average Mean Absolute error and Confusion Matrix Using SVD
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{preds =}\StringTok{ }\KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{unlist}\NormalTok{(prats2))}
+\KeywordTok{cat}\NormalTok{(}\StringTok{"avg MAE ="}\NormalTok{,}\KeywordTok{avgMAE}\NormalTok{(preds))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## avg MAE = 2.57295
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{cat}\NormalTok{(}\StringTok{"Confusion Matrix with Threshold Like as 3 }\CharTok{\textbackslash{}n}\StringTok{ }\CharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Confusion Matrix with Threshold Like as 3 
+## 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{showCM}\NormalTok{(preds, }\DataTypeTok{like=}\DecValTok{3}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## TN=  320 FP=    0
+## FN=  605 TP=    0  (total=925)
+## accuracy  = 34.6%
+## precision = NaN%
+## recall    = 0.0%
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{cat}\NormalTok{(}\StringTok{"Confusion Matrix with Threshold Like as 2 }\CharTok{\textbackslash{}n}\StringTok{ }\CharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Confusion Matrix with Threshold Like as 2 
+## 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{showCM}\NormalTok{(preds, }\DataTypeTok{like=}\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## TN=  126 FP=    2
+## FN=  780 TP=   17  (total=925)
+## accuracy  = 15.5%
+## precision = 89.5%
+## recall    = 2.1%
+\end{verbatim}
+
+
+\end{document}
