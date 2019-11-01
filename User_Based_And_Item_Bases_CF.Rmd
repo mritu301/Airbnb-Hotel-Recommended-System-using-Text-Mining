@@ -1,0 +1,703 @@
+---
+title: "User Based CF and Item Based CF"
+author: "Mritunjay And Sunil"
+date: "12/10/2019"
+output: html_document
+---
+
+# Recommended System Techniques on Airbnb (Amsterdam Hotel Recommendation)
+# 1. User Based CF 
+# 2. Item Based CF
+##   i.   Cosine Simarity
+##   ii.  Pearson's Similarity
+##   iii. Euclidean Similarity
+##   iv.  Jacard Similarity
+
+### Load All User Defined functions
+```{r}
+# Make recommendations for the target user using User-based CF
+getrecommendations_UUB <- function(targetuser, users, topN=5, simfun=jacardsim) {
+  sims = apply(users,1,function(user) simfun(user,targetuser))
+  sims = sims[!is.na(sims) & sims >=0]
+  wavrats = apply(users[names(sims),is.na(targetuser),drop=FALSE],2,function(unseenrats) sum(sims*unseenrats,na.rm=TRUE))
+  s = sort(wavrats[!is.na(wavrats)], decreasing = TRUE)
+  if (topN == FALSE) s else s[1:min(topN,length(s))] # get topN items
+}
+
+# get recommedations for the target user using Item-based CF
+getrecommendations_IIB <- function(targetuser, itemsims, topN=5) {
+  targetuser = targetuser[colnames(itemsims)] # ensure the item order is the same
+  seenitems  = !is.na(targetuser)
+  unseenitems = is.na(targetuser)
+  seenrats = targetuser[seenitems]
+  #not much difference between below two options
+  preds = apply(itemsims[unseenitems,seenitems, drop=FALSE], 1, function(sims) my.weighted.mean(sims, seenrats))
+  #preds = apply(itemsims[unseenitems,seenitems, drop=FALSE], 1, function(sims) sum(sims*seenrats,na.rm=TRUE))
+  s = sort(preds[!is.na(preds)] , decreasing = TRUE)
+  s[1:min(topN,length(s))]  # get topN items
+}
+
+# evaluate recomendations (if trainusers != NULL then do User-based CF else do Item-based CF)
+# computes #testitems in topN recommendations (hits) for each testuser across a set of hold-out testitems
+evalrecs = function(testusers, trainusers=NULL, itemsims=NULL, numtestitems=10, random=FALSE, topN=3, simfun=jacardsim) {
+  res = sapply(1:nrow(testusers),function(i) {
+    cat(".")
+    testuserI(testusers[i,],trainusers=trainusers,itemsims=itemsims,numtestitems=numtestitems,random=random,topN=topN,simfun=simfun)})
+  colnames(res) = rownames(testusers)
+  res
+}
+
+# may give inaccurate results if testuser is in trainusers (trainuser ratings on testitem are not hidden)
+testuserI <- function(testuser, trainusers=NULL, itemsims=NULL, numtestitems=10, random=FALSE, topN=3, simfun=jacardsim) {
+  seenitemnames   = names(testuser)[!is.na(testuser)]
+  unseenitemnames = names(testuser)[is.na(testuser)]  # may be null
+  if (random) testitemnames = sample(seenitemnames,min(numtestitems,length(seenitemnames))) # test random N items
+  else testitemnames = seenitemnames[1:min(numtestitems,length(seenitemnames))] # test first N items
+  
+  recs = ranks = list()
+  rand = is.null(trainusers) & is.null(itemsims)
+  for (testitemname in testitemnames) {
+    truerating = testuser[testitemname] 
+    testuser[testitemname] = NA 
+    unseenitems = c(testitemname, unseenitemnames)
+    if (!is.null(trainusers)) {
+      # user-based CF
+      usersims = apply(trainusers,1,function(trainuser) simfun(trainuser,testuser))
+      usersims = usersims[!is.na(usersims) & usersims >=0]
+      uitemsims = apply(trainusers[names(usersims),unseenitems,drop=FALSE],2,function(itemrats) sum(usersims*itemrats,na.rm=TRUE))
+    }
+    else if (!is.null(itemsims)) {
+      # item-based CF
+      seenitems = setdiff(seenitemnames, testitemname)
+      seenrats = testuser[seenitems]
+      uitemsims = apply(itemsims[unseenitems,seenitems,drop=FALSE],1,function(sims) my.weighted.mean(sims,seenrats))
+    }
+    else {
+      # random prediction
+      topNitems = sample(unseenitems,min(topN,length(unseenitems)))
+      recs = c(recs,as.integer(is.element(testitemname,topNitems)))
+    }
+    if(!rand) {
+      names(uitemsims) = unseenitems 
+      ssims = sort(uitemsims[!is.na(uitemsims)], decreasing = TRUE)
+      ssims = ssims[1:min(topN,length(ssims))]
+      res = as.integer(is.element(testitemname,names(ssims))) # test if the testitem is in the topN recommendations
+      #res = paste(testitemname, paste(names(ssims[1:5]),collapse=",") ) # output item names only
+      recs = c(recs,res)
+      
+      rk  = rank(uitemsims, na.last=NA)   # removes NA's
+      rkpc = ((length(rk) - rk[testitemname] + 1)*100)/length(rk)
+      ranks = c(ranks,rkpc)
+    }
+    testuser[testitemname] = truerating # restore the actual rating
+  }
+  # ensure outut is fixed length array
+  if (length(recs)==0)  m1 = matrix(NA,numtestitems) 
+  else {
+    m1 = as.matrix(recs)
+    if (length(m1) < numtestitems) for (i in (length(m1)+1):(numtestitems)) {m1=rbind(m1,NA)}
+  }
+  if (length(ranks)==0) m2 = matrix(NA,numtestitems)
+  else {
+    m2 = as.matrix(ranks) 
+    if (length(m2) < numtestitems) for (i in (length(m2)+1):(numtestitems)) {m2=rbind(m2,NA)}
+  }
+  return(cbind(m1,m2))
+}
+
+meanHR = function(recs) {mean(unlist(recs[1:nrow(recs)/2,]),na.rm=TRUE)}
+meanPR = function(recs) {mean(unlist(recs[(nrow(recs)/2+1):nrow(recs),]),na.rm=TRUE)}
+
+
+
+# Make recommendations for the target user using User-based CF
+getrecommendations_UU <- function(targetuser, users, topN=5, simfun=pearsonsim) {
+  sims = apply(users,1,function(user) simfun(user,targetuser)) 
+  sims = sims[!is.na(sims) & sims >=0]
+  wavrats = apply(users[names(sims),is.na(targetuser), drop=FALSE],2,function(rats) weighted.mean(rats, sims, na.rm=TRUE))
+  s = sort(wavrats[!is.na(wavrats)], decreasing = TRUE)
+  if (topN == FALSE) s else s[1:min(topN,length(s))] # get topN items
+}
+
+# get recommedations for the target user using Item-based CF
+getrecommendations_II <- function(targetuser, itemsims, topN=5) {
+  targetuser = targetuser[colnames(itemsims)] # ensure the item order is the same as simmatrix
+  seenitems  = !is.na(targetuser)
+  unseenitems = is.na(targetuser)
+  seenrats = targetuser[seenitems]
+  preds = apply(itemsims[unseenitems,seenitems, drop=FALSE], 1, function(simrow) my.weighted.mean(seenrats, simrow))
+  sp = sort(preds[!is.na(preds)] , decreasing = TRUE)
+  sp[1:min(topN,length(sp))]  # get topN items
+}
+
+# compute the item-item similarity matrix (the matrix is symmetric so can compute half & then copy)
+# (setting dir=1 generates the user similarity matrix)
+getitemsimsmatrix = function(users, simfun=cosinesim, dir=2) {
+  rw <<- 1; 
+  itemsims = apply(users, dir, function(itemA) {
+    rw <<- rw + 1 ; cl <<- 1; 
+    apply(users,dir,function(itemB) {cl<<-cl+1; if (cl<rw) NA else if (cl==rw) NA else simfun(itemA,itemB)})
+  })
+  m = forceSymmetric(itemsims,uplo="L") # copy lower half to upper half
+  as.matrix(m)
+}
+
+# similarity functions
+euclidsim = function(x,y) { z=(y-x)^2; sz=sqrt(sum(z,na.rm=TRUE));
+                            if (sz!=0) 1/(1+sz) else if (length(which(!is.na(z)))==0) NA else 1/(1+sz)}
+
+euclidsimF= function(x,y) { z=(y-x)^2; sz=sum(z,na.rm=TRUE);
+                            if (sz!=0) 1/(1+sz) else if (length(which(!is.na(z)))==0) NA else 1/(1+sz)} 
+
+cosinesim = function(x,y) { xy = x*y; sum(xy, na.rm=TRUE)/(sqrt(sum(x[!is.na(xy)]^2)*sum(y[!is.na(xy)]^2)))}
+
+pearsonsim= function(x,y) { suppressWarnings(cor(unlist(x),unlist(y),use="pairwise.complete.obs")) }
+
+mypearsim = function(x,y) { xy = x*y; x=x[!is.na(xy)]; y=y[!is.na(xy)]; 
+                            mx=mean(x); my=mean(y);
+                            sum((x-mx)*(y-my))/(sqrt(sum((x-mx)^2)*sum((y-my)^2)))}
+
+pearsonRM = function(x,y) { mx=mean(x,na.rm=TRUE);my=mean(y,na.rm=TRUE);
+                            xy=x*y;x=x[!is.na(xy)]; y=y[!is.na(xy)]
+                            sum((x-mx)*(y-my))/(sqrt(sum((x-mx)^2)*sum((y-my)^2)))}
+
+jacardsim = function(x,y) { validx= !is.na(x); validy= !is.na(y); 
+                            sum(as.integer(validx&validy))/sum(as.integer(validx|validy))}
+
+###############################################################################
+# For testing, we split the data by user, so test users are not in the trainset
+# This is clean but does not test the situation where partial information 
+# is known about a user (as may be the case in User-based scenario).
+# For item-based having partial info will make very little difference (since simmatrix is precomputed)
+###############################################################################
+
+# make predicted ratings for a sample of items for each test user
+# if trainusers is defined then do User-based CF else do Item-based CF
+# Note: if Item-based CF is to be performed them the itemsimilarity matrix (itemsims) must be defined
+predictCF = function(testusers, trainusers=NULL, itemsims=NULL, numtestitems=10, random=FALSE, simfun=cosinesim) {
+  preds = sapply(1:nrow(testusers),function(i) {
+    cat(".")
+    predictuser(testusers[i,],trainusers=trainusers,itemsims=itemsims,numtestitems=numtestitems,random=random,simfun=simfun)})
+  colnames(preds) = rownames(testusers)
+  preds
+}
+
+predictuser <- function(testuser, trainusers=NULL, itemsims=NULL, numtestitems=10, random=FALSE, simfun=cosinesim) {
+  seenitemnames   = names(testuser)[!is.na(testuser)]
+  if (random) testitemnames = sample(seenitemnames,min(numtestitems,length(seenitemnames))) # test a random N items
+  else testitemnames = seenitemnames[1:min(numtestitems,length(seenitemnames))] # test first N items
+  preds = list()
+  for (testitemname in testitemnames) {
+    truerating = testuser[testitemname] 
+    testuser[testitemname] = NA
+    if (!is.null(trainusers)) {
+      # do user-based CF
+      usersims = apply(trainusers,1,function(trainuser) simfun(trainuser,testuser))
+      usersims = usersims[!is.na(usersims) & usersims >=0]
+      predictedrating = my.weighted.mean(trainusers[names(usersims),testitemname], usersims)
+    }
+    else {
+      # do item-based CF
+      predictedrating = my.weighted.mean(testuser[seenitemnames], itemsims[seenitemnames,testitemname])
+    }
+    testuser[testitemname] = truerating # restore the actual rating
+    preds = c(preds,predictedrating,truerating)
+  }
+  preds = unname(preds)
+  m = as.matrix(preds)
+  if (length(m) < numtestitems*2) for (i in (length(m)+1):(numtestitems*2)) { m = rbind(m,NA)}
+  return(m)
+}
+
+# a weighted mean that handles NA's in both arguments (ratings and similarities)
+my.weighted.mean = function(x,y) {
+    xy = x*y; 
+    z = sum(abs(y[!is.na(xy)]))
+    if (z == 0) as.numeric(NA) else sum(xy,na.rm=TRUE)/z 
+}
+
+# computes average, mean absolute error
+# each row contains prediction, actual, prediction, actual etc, hence errors are just the diff between consecutive cells
+avgMAE = function(preds) {
+  plist = unlist(preds)
+  errors = sapply(1:(length(plist)/2),function(i) abs(plist[i*2-1]-plist[i*2]))
+  errors = errors[errors != Inf]
+  mean(errors,na.rm=TRUE)
+}
+
+showCM = function(preds, like) {
+  plist = unlist(preds)
+  cnts = sapply(1:(length(plist)/2), function(i) {
+    pred = plist[i*2-1] ; actual = plist[i*2]
+    if (!is.na(pred) & !is.nan(actual)) {
+      if (pred>=like) {if(actual>=like) c(1,0,0,0) else c(0,1,0,0)}
+      else if(actual<like) c(0,0,1,0) else c(0,0,0,1) 
+    } else c(0,0,0,0)
+  })
+  s = rowSums(cnts)   #returns cnts for: TP, FP, TN, FN
+
+  cat(sprintf("TN=%5d FP=%5d\n",s[3],s[2]))
+  cat(sprintf("FN=%5d TP=%5d  (total=%d)\n",s[4],s[1], sum(s)))
+  cat(sprintf("accuracy  = %0.1f%%\n",(s[1]+s[3])*100/sum(s)))
+  cat(sprintf("precision = %3.1f%%\n",s[1]*100/(s[1]+s[2])))
+  cat(sprintf("recall    = %3.1f%%\n",s[1]*100/(s[1]+s[4])))
+}
+
+#######################
+# miscellaneous aids
+#######################
+
+maketraintest = function(users,numtestusers) {
+  testnames  = sample(rownames(users), min(numtestusers,nrow(users))) # identify N users randomly for testing
+  trainnames = setdiff(rownames(users),testnames) # take remaining users for training
+  trainusers <<- users[trainnames,]
+  testusers  <<- users[testnames,]
+  list(trainusers,testusers)
+}
+
+# extract only prediction or only actual ratings from the output of predictCF()
+listpreds= function(results) {unlist(results)[c(TRUE,FALSE)]}
+listrats = function(results) {unlist(results)[c(FALSE,TRUE)]}
+validcnt = function(x) length(which(is.finite(x)))
+
+# How sparse is the data in a data frame? Compute % of non-blank entries
+fillrate = function(df) {cat((length(which(!is.na(df)))*100)/(nrow(df)*ncol(df)),"%")}
+
+# same as above but also works on vectors
+fillratev = function(df) {t=unlist(df); cat((length(which(!is.na(t)))*100)/length(t),"%")}
+
+# how many values are > 0? Compute % of entries > 0
+fillrateG = function(df,thresh) {t=unlist(df); cat((length(which(!is.na(t) & t > thresh))*100)/length(t),"%")}
+fillrateL = function(df,thresh) {t=unlist(df); cat((length(which(!is.na(t) & t < thresh))*100)/length(t),"%")}
+fillrateE = function(df,thresh) {t=unlist(df); cat((length(which(!is.na(t) & t == thresh))*100)/length(t),"%")}
+```
+
+### Load all the relevant libraries and Get the working directory and Load the Amsterdam Hotel Airbn data set
+```{r}
+pacman::p_load(tidyverse, purrr, stringr, data.table, modelr, readxl,caret, corrplot, broom, ggpubr, MASS,relaimpo, car,interplot, caTools, mice, gbm, reshape2, compiler, recommenderlab, Matrix, knitr,tidyr, dplyr)
+getwd()
+airbnb = read.csv("airbnb.csv", header=TRUE, sep=",") # transaction format!
+names(airbnb) = c(colnames(airbnb))
+head(airbnb,1)
+```
+
+### Structure of Datasets
+```{r}
+#airbnb$Hotel_Id = as.factor(airbnb$Hotel_Id)
+# airbnb$User_Id = as.factor(airbnb$User_Id)
+#airbnb$Hotel_Id = as.character(airbnb$Hotel_Id)
+#length(unique(airbnb$Hotel_Id))
+#airbnb$Hotel_Id = factor(airbnb$Hotel_Id,levels=c(unique(airbnb$Hotel_Id)), ordered = FALSE)
+str(airbnb)
+```
+
+
+### Summary of Dataset
+```{r}
+#summary(airbnb)
+```
+
+### Create a dataset for CF from main airbnb dataset (User_ID, Hotel_ID, Ratings)
+```{r}
+colnames(airbnb)
+airbnbCF = airbnb[,c("User_Id","Hotel_Id","Ratings")]
+head(airbnbCF,4)
+```
+### Unique User and Hotel
+```{r}
+length(unique(airbnbCF$User_Id)) 
+length(unique(airbnbCF$Hotel_Id))
+dim(airbnbCF)
+```
+
+### Removing all those users corresponding to missing ratings and
+### Extract only the explicit ratings and visualize the histogram of Ratings
+```{r}
+sapply(airbnbCF, function(x){sum(is.na(x))})
+airbnbCF$Ratings[is.na(airbnbCF$Ratings)] = 0
+airbnbCF = airbnbCF[airbnbCF$Ratings > 0,]
+sapply(airbnbCF, function(x){sum(is.na(x))})
+hist(airbnbCF$Ratings)
+```
+
+### Eliminate users with too few ratings and Consider Activer users who had rated hotels more than and equal to 10 hotels
+```{r}
+cnts = aggregate(Hotel_Id ~ User_Id, data = airbnbCF, FUN = length)
+colnames(cnts) = c("user","numitems")
+activeusers = cnts$user[cnts$numitems >= 10] ; length(activeusers)
+evCF = airbnbCF[airbnbCF$User_Id %in% activeusers,]
+dim(evCF)
+```
+
+### Eliminate Hotels with too few ratings and Consider Active Hotels who had been rated more than and equal to 10 users
+```{r}
+cnts = aggregate(User_Id ~ Hotel_Id, data = airbnbCF, FUN=length)
+colnames(cnts) = c("item","numusers")
+popularhotels = cnts$item[cnts$numusers >= 10] ; length(popularhotels)
+ev = evCF[evCF$Hotel_Id %in% popularhotels,]
+dim(ev)
+str(ev)
+```
+
+### Remove duplicate records from the datasets
+```{r}
+ev_Final = ev %>% distinct(User_Id,Hotel_Id,.keep_all = TRUE)
+dim(ev_Final)
+str(ev_Final)
+```
+
+### Convert the dataframe from long to wide format
+```{r}
+users = acast(ev_Final, User_Id ~ Hotel_Id, value.var = "Ratings")
+users = sweep(users, 1, rowMeans(users, na.rm=TRUE) )  # normalise the data
+dim(users)  
+```
+
+### Check the sparsity and fill rate of the matrix
+```{r}
+fillrate(users)
+```
+
+### setup the train/test scheme
+```{r}
+numtestusers = 84
+test  = sample(rownames(users), min(numtestusers,nrow(users)))
+train = setdiff(rownames(users),test)
+```
+
+# User Based Collaborative Filtering 
+## 1. Cosine similarity
+### Test UBCF Cosine similarity metrics
+```{r}
+preds = predictCF(users[test,], users[train,], numtestitems=10, random=FALSE, simfun=cosinesim) ; preds
+cat("avg MAE =",avgMAE(preds), "from", validcnt(listpreds(preds)), "tests")
+```
+
+### viewing a histogram of the ratings helps gauge the impact of different MAE's and decide what the likethresh should be
+```{r}
+hist(unlist(users[train,]))
+likethresh = 2.5 # insert your own value here
+showCM(preds,likethresh)
+```
+
+## 2. Euclidean similarity
+```{r}
+preds = predictCF(users[test,], users[train,], numtestitems=10, random=FALSE, simfun=euclidsim) ; preds
+cat("avg MAE =",avgMAE(preds), "from", validcnt(listpreds(preds)), "tests")
+```
+
+### viewing a histogram of the ratings helps gauge the impact of different MAE's and decide what the likethresh should be
+```{r}
+hist(unlist(users[train,]))
+likethresh = 2.5 # insert your own value here
+showCM(preds,likethresh)
+```
+
+## 3. Pearson's Simarity
+```{r}
+preds = predictCF(users[test,], users[train,], numtestitems=10, random=FALSE, simfun=pearsonsim) ; preds
+cat("avg MAE =",avgMAE(preds), "from", validcnt(listpreds(preds)), "tests")
+```
+
+### viewing a histogram of the ratings helps gauge the impact of different MAE's and decide what the likethresh should be
+```{r}
+hist(unlist(users[train,]))
+likethresh = 2.5 # insert your own value here
+showCM(preds,likethresh)
+```
+
+## 3. jacard Simarity
+```{r}
+preds = predictCF(users[test,], users[train,], numtestitems=10, random=FALSE, simfun=jacardsim) ; preds
+cat("avg MAE =",avgMAE(preds), "from", validcnt(listpreds(preds)), "tests")
+```
+
+### viewing a histogram of the ratings helps gauge the impact of different MAE's and decide what the likethresh should be
+```{r}
+hist(unlist(users[train,]))
+likethresh = 2.5 # insert your own value here
+showCM(preds,likethresh)
+```
+
+## Recommendation
+### Using pearson's similarity for user - 57920
+```{r}
+users_r = acast(ev_Final, User_Id ~ Hotel_Id, value.var = "Ratings")
+users_r = sweep(users_r, 1, rowMeans(users_r, na.rm=TRUE) )  # normalise the data
+users_r = as.matrix(users_r)
+rownames(users_r)[1]
+target = users_r[rownames(users_r)[1],]
+names(getrecommendations_UU(target, users_r, simfun=pearsonsim))
+
+Top1_Hotel = integer(nrow(users_r))
+Top2_Hotel = integer(nrow(users_r))
+Top3_Hotel = integer(nrow(users_r))
+Top4_Hotel = integer(nrow(users_r))
+Top5_Hotel = integer(nrow(users_r))
+
+for (i in 1:nrow(users_r)) {
+  target = users_r[rownames(users_r)[i],]
+  a = getrecommendations_UU(target, users_r, simfun=pearsonsim)
+  Top1_Hotel[i] = names(a[order(a,decreasing=TRUE)[1]])
+  Top2_Hotel[i] = names(a[order(a,decreasing=TRUE)[2]])
+  Top3_Hotel[i] = names(a[order(a,decreasing=TRUE)[3]])
+  Top4_Hotel[i] = names(a[order(a,decreasing=TRUE)[4]])
+  Top5_Hotel[i] = names(a[order(a,decreasing=TRUE)[5]])
+}
+
+df_cf <- data.frame(Top1_Hotel, Top2_Hotel, Top3_Hotel, Top4_Hotel, Top5_Hotel, stringsAsFactors = TRUE)
+rownames(df_cf) = rownames(users)
+write.csv(df_cf, file = "User Based Collaborative Recommended Hotel For each user using pearsons.csv")
+```
+
+### Using Cosine similarity for user - 57920
+```{r}
+rownames(users_r)[1]
+getrecommendations_UU(target, users_r, simfun=cosinesim)
+
+Top1_Hotel = integer(nrow(users_r))
+Top2_Hotel = integer(nrow(users_r))
+Top3_Hotel = integer(nrow(users_r))
+Top4_Hotel = integer(nrow(users_r))
+Top5_Hotel = integer(nrow(users_r))
+
+for (i in 1:nrow(users_r)) {
+  target = users_r[rownames(users_r)[i],]
+  a = getrecommendations_UU(target, users_r, simfun=cosinesim)
+  Top1_Hotel[i] = names(a[order(a,decreasing=TRUE)[1]])
+  Top2_Hotel[i] = names(a[order(a,decreasing=TRUE)[2]])
+  Top3_Hotel[i] = names(a[order(a,decreasing=TRUE)[3]])
+  Top4_Hotel[i] = names(a[order(a,decreasing=TRUE)[4]])
+  Top5_Hotel[i] = names(a[order(a,decreasing=TRUE)[5]])
+}
+
+df_cf <- data.frame(Top1_Hotel, Top2_Hotel, Top3_Hotel, Top4_Hotel, Top5_Hotel, stringsAsFactors = TRUE)
+rownames(df_cf) = rownames(users)
+write.csv(df_cf, file = "User Based Collaborative Recommended Hotel For each user using cosine.csv")
+```
+
+### Using Cosine similarity for user - 57920
+```{r}
+rownames(users_r)[1]
+getrecommendations_UU(target, users_r, simfun=euclidsim)
+
+Top1_Hotel = integer(nrow(users_r))
+Top2_Hotel = integer(nrow(users_r))
+Top3_Hotel = integer(nrow(users_r))
+Top4_Hotel = integer(nrow(users_r))
+Top5_Hotel = integer(nrow(users_r))
+
+for (i in 1:nrow(users_r)) {
+  target = users_r[rownames(users_r)[i],]
+  a = getrecommendations_UU(target, users_r, simfun=euclidsim)
+  Top1_Hotel[i] = names(a[order(a,decreasing=TRUE)[1]])
+  Top2_Hotel[i] = names(a[order(a,decreasing=TRUE)[2]])
+  Top3_Hotel[i] = names(a[order(a,decreasing=TRUE)[3]])
+  Top4_Hotel[i] = names(a[order(a,decreasing=TRUE)[4]])
+  Top5_Hotel[i] = names(a[order(a,decreasing=TRUE)[5]])
+}
+
+df_cf <- data.frame(Top1_Hotel, Top2_Hotel, Top3_Hotel, Top4_Hotel, Top5_Hotel, stringsAsFactors = TRUE)
+rownames(df_cf) = rownames(users)
+write.csv(df_cf, file = "User Based Collaborative Recommended Hotel For each user using euclidean.csv")
+```
+
+### Using Jacard similarity for user - 57920
+```{r}
+rownames(users_r)[1]
+getrecommendations_UU(target, users_r, simfun=jacardsim)
+
+Top1_Hotel = integer(nrow(users_r))
+Top2_Hotel = integer(nrow(users_r))
+Top3_Hotel = integer(nrow(users_r))
+Top4_Hotel = integer(nrow(users_r))
+Top5_Hotel = integer(nrow(users_r))
+
+for (i in 1:nrow(users_r)) {
+  target = users_r[rownames(users_r)[i],]
+  a = getrecommendations_UU(target, users_r, simfun=jacardsim)
+  Top1_Hotel[i] = names(a[order(a,decreasing=TRUE)[1]])
+  Top2_Hotel[i] = names(a[order(a,decreasing=TRUE)[2]])
+  Top3_Hotel[i] = names(a[order(a,decreasing=TRUE)[3]])
+  Top4_Hotel[i] = names(a[order(a,decreasing=TRUE)[4]])
+  Top5_Hotel[i] = names(a[order(a,decreasing=TRUE)[5]])
+}
+
+df_cf <- data.frame(Top1_Hotel, Top2_Hotel, Top3_Hotel, Top4_Hotel, Top5_Hotel, stringsAsFactors = TRUE)
+rownames(df_cf) = rownames(users)
+write.csv(df_cf, file = "User Based Collaborative Recommended Hotel For each user using Jacard.csv")
+```
+
+# Item Based Collaborative Filtering
+### Convert the dataframe from long to wide format
+```{r}
+users_IBCF = acast(ev_Final, User_Id ~ Hotel_Id, value.var = "Ratings")
+users_IBCF = sweep(users_IBCF, 1, rowMeans(users_IBCF, na.rm=TRUE) )  # normalise the data
+dim(users_IBCF)  
+```
+
+### Check the sparsity and fill rate of the matrix
+```{r}
+fillrate(users_IBCF)
+```
+
+### setup the train/test scheme
+```{r}
+numtestusers = 84
+test  = sample(rownames(users_IBCF), min(numtestusers,nrow(users_IBCF)))
+train = setdiff(rownames(users_IBCF),test)
+```
+
+
+### compute the item similarity matrix 
+### Cosine Similarity
+```{r}
+st=Sys.time(); item_cosine_sims = getitemsimsmatrix(users_IBCF[train,], simfun=cosinesim); Sys.time()-st 
+cat("Fill rate for cosine similarity : "); fillrate(item_cosine_sims); cat("\n\n");
+
+st=Sys.time(); item_euclidean_sims = getitemsimsmatrix(users_IBCF[train,], simfun=euclidsim); Sys.time()-st
+cat("Fill rate for euclidean similarity : "); fillrate(item_euclidean_sims); cat("\n\n");
+
+st=Sys.time(); item_pearson_sims = getitemsimsmatrix(users_IBCF[train,], simfun=pearsonsim); Sys.time()-st 
+cat("Fill rate pearson's similarity  : "); fillrate(item_pearson_sims); cat("\n\n");
+
+st=Sys.time(); item_jacard_sims = getitemsimsmatrix(users_IBCF[train,], simfun=jacardsim); Sys.time()-st 
+cat("Fill rate jacard similarity : "); fillrate(item_euclidean_sims); cat("\n\n");
+```
+
+### test IBCF Using Cosine similarity
+```{r}
+preds = predictCF(users_IBCF[test,], itemsims=item_cosine_sims, numtestitems=10, random=FALSE)
+cat("avg MAE =",avgMAE(preds), "from", validcnt(listpreds(preds)),"tests")
+```
+
+### test IBCF Using euclidean similarity
+```{r}
+preds = predictCF(users_IBCF[test,], itemsims=item_euclidean_sims, numtestitems=10, random=FALSE)
+cat("avg MAE =",avgMAE(preds), "from", validcnt(listpreds(preds)),"tests")
+```
+
+### test IBCF Using pearson similarity
+```{r}
+preds = predictCF(users_IBCF[test,], itemsims=item_pearson_sims, numtestitems=10, random=FALSE)
+cat("avg MAE =",avgMAE(preds), "from", validcnt(listpreds(preds)),"tests")
+```
+
+### test IBCF Using jacard similarity
+```{r}
+preds = predictCF(users_IBCF[test,], itemsims=item_jacard_sims, numtestitems=10, random=FALSE)
+cat("avg MAE =",avgMAE(preds), "from", validcnt(listpreds(preds)),"tests")
+```
+
+### Recommendation for a user - 57920, using Item - Based
+### We required minimum of 2 hotels for recommendations using Euclidean similarity
+```{r}
+target = users_r[rownames(users_IBCF)[1],c("568005","789743")]
+getrecommendations_II(target, item_euclidean_sims)
+```
+
+### Recommendation using Cosine similarity for Item Based
+```{r}
+target = users_r[rownames(users_IBCF)[1],]
+getrecommendations_II(target, item_cosine_sims)
+
+Top1_Hotel = integer(nrow(users_IBCF))
+Top2_Hotel = integer(nrow(users_IBCF))
+Top3_Hotel = integer(nrow(users_IBCF))
+Top4_Hotel = integer(nrow(users_IBCF))
+Top5_Hotel = integer(nrow(users_IBCF))
+
+for (i in 1:nrow(users_IBCF)) {
+  target = users_r[rownames(users_IBCF)[i],]
+  a = getrecommendations_II(target, item_cosine_sims)
+  Top1_Hotel[i] = names(a[order(a,decreasing=TRUE)[1]])
+  Top2_Hotel[i] = names(a[order(a,decreasing=TRUE)[2]])
+  Top3_Hotel[i] = names(a[order(a,decreasing=TRUE)[3]])
+  Top4_Hotel[i] = names(a[order(a,decreasing=TRUE)[4]])
+  Top5_Hotel[i] = names(a[order(a,decreasing=TRUE)[5]])
+}
+
+df_cfib <- data.frame(Top1_Hotel, Top2_Hotel, Top3_Hotel, Top4_Hotel, Top5_Hotel, stringsAsFactors = TRUE)
+rownames(df_cfib) = rownames(users)
+write.csv(df_cfib, file = "Item Based Collaborative Recommended Hotel For each user using cosine.csv")
+```
+
+### Recommendation using Euclidean similarity for Item Based
+```{r}
+target = users_r[rownames(users_IBCF)[1],]
+getrecommendations_II(target, item_euclidean_sims)
+
+Top1_Hotel = integer(nrow(users_IBCF))
+Top2_Hotel = integer(nrow(users_IBCF))
+Top3_Hotel = integer(nrow(users_IBCF))
+Top4_Hotel = integer(nrow(users_IBCF))
+Top5_Hotel = integer(nrow(users_IBCF))
+
+for (i in 1:nrow(users_IBCF)) {
+  target = users_r[rownames(users_IBCF)[i],]
+  a = getrecommendations_II(target, item_euclidean_sims)
+  Top1_Hotel[i] = names(a[order(a,decreasing=TRUE)[1]])
+  Top2_Hotel[i] = names(a[order(a,decreasing=TRUE)[2]])
+  Top3_Hotel[i] = names(a[order(a,decreasing=TRUE)[3]])
+  Top4_Hotel[i] = names(a[order(a,decreasing=TRUE)[4]])
+  Top5_Hotel[i] = names(a[order(a,decreasing=TRUE)[5]])
+}
+
+df_cfib <- data.frame(Top1_Hotel, Top2_Hotel, Top3_Hotel, Top4_Hotel, Top5_Hotel, stringsAsFactors = TRUE)
+rownames(df_cfib) = rownames(users)
+write.csv(df_cfib, file = "Item Based Collaborative Recommended Hotel For each user using euclidean.csv")
+```
+
+### Recommendation using Pearson's similarity for Item Based
+```{r}
+target = users_r[rownames(users_IBCF)[1],]
+getrecommendations_II(target, item_pearson_sims)
+
+Top1_Hotel = integer(nrow(users_IBCF))
+Top2_Hotel = integer(nrow(users_IBCF))
+Top3_Hotel = integer(nrow(users_IBCF))
+Top4_Hotel = integer(nrow(users_IBCF))
+Top5_Hotel = integer(nrow(users_IBCF))
+
+for (i in 1:nrow(users_IBCF)) {
+  target = users_r[rownames(users_IBCF)[i],]
+  a = getrecommendations_II(target, item_pearson_sims)
+  Top1_Hotel[i] = names(a[order(a,decreasing=TRUE)[1]])
+  Top2_Hotel[i] = names(a[order(a,decreasing=TRUE)[2]])
+  Top3_Hotel[i] = names(a[order(a,decreasing=TRUE)[3]])
+  Top4_Hotel[i] = names(a[order(a,decreasing=TRUE)[4]])
+  Top5_Hotel[i] = names(a[order(a,decreasing=TRUE)[5]])
+}
+
+df_cfib <- data.frame(Top1_Hotel, Top2_Hotel, Top3_Hotel, Top4_Hotel, Top5_Hotel, stringsAsFactors = TRUE)
+rownames(df_cfib) = rownames(users)
+write.csv(df_cfib, file = "Item Based Collaborative Recommended Hotel For each user using pearson.csv")
+```
+
+### Recommendation using Jacard similarity for Item Based
+```{r}
+target = users_r[rownames(users_IBCF)[1],]
+getrecommendations_II(target, item_jacard_sims)
+
+Top1_Hotel = integer(nrow(users_IBCF))
+Top2_Hotel = integer(nrow(users_IBCF))
+Top3_Hotel = integer(nrow(users_IBCF))
+Top4_Hotel = integer(nrow(users_IBCF))
+Top5_Hotel = integer(nrow(users_IBCF))
+
+for (i in 1:nrow(users_IBCF)) {
+  target = users_r[rownames(users_IBCF)[i],]
+  a = getrecommendations_II(target, item_jacard_sims)
+  Top1_Hotel[i] = names(a[order(a,decreasing=TRUE)[1]])
+  Top2_Hotel[i] = names(a[order(a,decreasing=TRUE)[2]])
+  Top3_Hotel[i] = names(a[order(a,decreasing=TRUE)[3]])
+  Top4_Hotel[i] = names(a[order(a,decreasing=TRUE)[4]])
+  Top5_Hotel[i] = names(a[order(a,decreasing=TRUE)[5]])
+}
+
+df_cfib <- data.frame(Top1_Hotel, Top2_Hotel, Top3_Hotel, Top4_Hotel, Top5_Hotel, stringsAsFactors = TRUE)
+rownames(df_cfib) = rownames(users)
+write.csv(df_cfib, file = "Item Based Collaborative Recommended Hotel For each user using Jacard.csv")
+```
+
+# The End
